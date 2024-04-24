@@ -1,0 +1,90 @@
+<!-- eslint-disable @angular-eslint/template/eqeqeq -->
+<!-- <ion-header class="header-container ion-no-border">
+  <ion-toolbar>
+    <ion-grid class="ion-no-padding">
+      <ion-row class="row-wrapper">
+        <ion-col class="title-column">
+          <div lines="none" class="title-content  ion-no-margin ion-no-padding">
+            <h1>Notification</h1>
+          </div>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </ion-toolbar>
+</ion-header> -->
+
+<ion-content>
+  <div class="wrapper">
+    <ion-grid class="ion-no-padding" class="main-grid-container">
+      <ion-row class="h-100-per">
+        <ion-col size="12" style="display: flex; flex-direction:row;" class="ion-no-padding">
+          <!-- table right div -->
+          <!-- var(--ion-color-background) -->
+          <div class="table-media-query">
+            <ion-grid class="ion-no-padding padding-hide-md-down right-contant">
+              <ion-row
+                style="display: flex; justify-content: center; align-items: center; margin: 30px 0px 28px 0px; height: 42px;">
+                <ion-col>
+                  <h1 style="font-family: 'roboto-medium'; font-size: 20px; color: black">Recently Sent</h1>
+                </ion-col>
+              </ion-row>
+              <ion-row>
+                <!-- Angular Material DATATABLE -->
+                <ion-col size="12" class="ion-no-padding">
+                  <app-table *ngIf="isInitTriggered" #notification_grid
+                    [tableDetails]="notificationTableDetails"></app-table>
+                </ion-col>
+              </ion-row>
+            </ion-grid>
+          </div>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </div>
+</ion-content>
+<ion-modal [backdropDismiss]="false" #modal trigger="open-filter-model-notification" class="template-filter"
+  animated={true}>
+  <ng-template>
+    <ion-header class="ion-no-border config-header">
+      <ion-toolbar>
+        <ion-title style="font-size: 16px;">Search Criteria</ion-title>
+        <ion-buttons slot="end">
+          <ion-icon class="close_icon" (click)=" onClose()" name="close-outline"></ion-icon>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content>
+      <ion-row>
+        <ion-col class="aside-filter">
+          <!-- <ng-container [ngTemplateOutlet]="notificationcontent"></ng-container> -->
+        </ion-col>
+      </ion-row>
+    </ion-content>
+    <ion-footer class="footer-view">
+      <!-- <ng-container [ngTemplateOutlet]="notificationfooter"></ng-container> -->
+    </ion-footer>
+  </ng-template>
+</ion-modal>
+<ion-modal [backdropDismiss]="false" #modal trigger="open-filter-model-notification-tab-view" class="template-filter"
+  animated={true}>
+  <ng-template>
+    <ion-header class="ion-no-border config-header">
+      <ion-toolbar>
+        <ion-title style="font-size: 16px;">Search Criteria</ion-title>
+        <ion-buttons slot="end">
+          <ion-icon class="close_icon" (click)="onClose()" name="close-outline"></ion-icon>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content>
+      <ion-row>
+        <ion-col class="aside-filter">
+          <!-- <ng-container [ngTemplateOutlet]="notificationcontent"></ng-container> -->
+        </ion-col>
+      </ion-row>
+    </ion-content>
+    <ion-footer class="footer-view">
+      <!-- <ng-container [ngTemplateOutlet]="notificationfooter"></ng-container> -->
+    </ion-footer>
+  </ng-template>
+</ion-modal>

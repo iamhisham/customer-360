@@ -1,0 +1,234 @@
+<section class="whole-content-wrapper">
+  <swiper-container #swiper>
+    <swiper-slide>
+      <ion-row [hidden]="!purchasedDetails">
+        <ion-col size="12">
+          <div class="common-header">Purchase Overview</div>
+        </ion-col>
+        <ion-col size="12">
+          <ion-row *ngIf="!orderDetails">
+            <ion-col size="12">
+              <ng-container>
+                <div class="loader ion-margin-bottom">
+                  <ion-spinner></ion-spinner>
+                </div>
+              </ng-container>
+            </ion-col>
+          </ion-row>
+          <ion-row *ngIf="(orderDetails?.lastPurchaseDate == null && orderDetails != null)">
+            <ion-col size="12" class="none-data-account" style="margin: 0px 0px 20px 0px;">
+              <div class="main-none-container">
+                <div class="sub-container-none">
+                  No purchase orders</div>
+              </div>
+            </ion-col>
+          </ion-row>
+          <ion-card class="order-card-container" *ngIf="orderDetails?.lastPurchaseDate != null">
+            <ion-row *ngIf="orderDetails">
+              <ion-col size="4">
+                <div>
+                  <ion-label class="common-sub-header header" [ngClass]="{'no-padd': !orderDetails.lastPurchaseDate}">
+                    Last purchase Date
+                  </ion-label>
+                  <ion-note class="date-label" *ngIf="orderDetails?.lastPurchaseDate">
+                    {{datePipe.transform(orderDetails?.lastPurchaseDate, commonService.date_format) || '-- : --' }}
+                  </ion-note>
+                  <h4>{{(orderDetails?.currencyIsoCode | CurrencyPipe)}} {{(orderDetails?.lastPurchaseAmount | CurrencyPipe)}}</h4>
+                </div>
+              </ion-col>
+              <ion-col size="4">
+                <div>
+                  <ion-label class="common-sub-header header" [ngClass]="{'no-padd': !orderDetails.lastPurchaseDate}">
+                    Average purchase value
+                  </ion-label>
+                  <h4>{{(orderDetails?.currencyIsoCode | CurrencyPipe)}} {{(orderDetails?.averagePurchaseValue | CurrencyPipe)}}</h4>
+                </div>
+              </ion-col>
+              <ion-col size="4">
+                <div>
+                  <ion-label class="common-sub-header header" [ngClass]="{'no-padd': !orderDetails.lastPurchaseDate}">
+                    Total purchase value
+                  </ion-label>
+                  <h4>{{(orderDetails?.currencyIsoCode | CurrencyPipe)}} {{(orderDetails?.totalPurchaseValue | CurrencyPipe) }}</h4>
+                </div>
+              </ion-col>
+            </ion-row>
+          </ion-card>
+
+        </ion-col>
+        <ion-col size="12">
+          <div class="common-header">Purchase History</div>
+        </ion-col>
+        <ion-col size="12">
+          <app-table #order_grid [tableDetails]="ordersTable"></app-table>
+        </ion-col>
+      </ion-row>
+    </swiper-slide>
+    <swiper-slide>
+      <ion-row [hidden]="purchasedDetails != null" class="information-container">
+        <ion-col size="12" class="information-header">
+          <div>
+            <ion-icon name="chevron-back-outline" (click)="backToGrid()"></ion-icon>
+            <ion-label> Order Id: {{purchasedDetails?.orderNumber || 'null'}} | Ordered Date: {{datePipe.transform(purchasedDetails?.orderStartDate, commonService.date_time_format)}} |
+              Amount: {{purchasedDetails?.currencyIsoCode | CurrencyPipe}}
+              {{purchasedDetails?.grandTotalAmount | CurrencyPipe}}</ion-label>
+          </div>
+        </ion-col>
+        <ion-col size="4" class="information-content-left common-container-bg">
+          <ion-row class="inner-left-row">
+            <ion-col class="details-content">
+              <ion-label> Status</ion-label>
+              <ion-card>
+                <ion-note>{{purchasedDetails?.status || 'No Status'}}</ion-note>
+              </ion-card>
+            </ion-col>
+            <!-- <ion-col size="12" class="details-content">
+              <ion-label>Customer Information</ion-label>
+              <ion-card>
+                <ion-note>Name: {{customer.name}}</ion-note>
+                <ion-note *ngIf="customer.email">Email :
+                  {{customer.email}}</ion-note>
+                <ion-note *ngIf="customer.phone">Phone :
+                  {{customer.phone}}</ion-note>
+              </ion-card>
+            </ion-col> -->
+            <ion-col size="12" class="details-content">
+              <ion-label>Billing Address</ion-label>
+              <ion-card>
+                <ion-note>{{purchasedDetails?.billingAddress}}</ion-note>
+                <ion-note>Phone: {{purchasedDetails?.billingPhoneNumber}}</ion-note>
+              </ion-card>
+            </ion-col>
+            <ion-col size="12" class="details-content">
+              <ion-label>Shipping Address</ion-label>
+              <ion-card *ngFor="let list of purchasedDetails?.fulfillmentOrders">
+                <ion-note>{{list.fulfilledToAddress}}</ion-note>
+                <ion-note>Phone: {{list.fulfilledToPhone}}</ion-note>
+              </ion-card>
+            </ion-col>
+            <ion-col size="12" class="details-content">
+              <ion-label>Payment Information</ion-label>
+              <ion-card *ngFor="let list of paymentList?.data[0]?.paymentMethods">
+                <div>
+                  <ion-note>Name: {{list.name}}</ion-note>
+                  <ion-note>Credit card<span *ngIf="list.type && list.brand">:{{list.type}}({{list.brand}})</span>
+                  </ion-note>
+                </div>
+              </ion-card>
+              <ion-card *ngIf="paymentList?.data?.length == 0 || paymentList?.data[0]?.paymentMethods.length == 0">
+                <div class="sub-container-none">
+                  No Payment found
+                </div>
+              </ion-card>
+            </ion-col>
+            <ion-col size="12" class="details-content" *ngIf="purchasedDetails?.fulfillmentOrders?.length != 0">
+              <ion-label>Shipping Information</ion-label>
+              <ion-card *ngFor="let list of purchasedDetails?.fulfillmentOrders">
+                <ion-note>Status: {{list.status}} </ion-note>
+                <ion-note>Shipped on: {{datePipe.transform(list.fulfilledDate, commonService.date_format)}}</ion-note>
+                <ion-note>Shipped via: ***</ion-note>
+                <ion-note style="display: flex">Tracking:&nbsp;
+                  <a [href]="list.trackingUrl" target="_blank">
+                    <span style="color: #5164B8; display: flex;">{{list.trackingNumber}}
+                      <ion-img *ngIf="list.trackingNumber" href="" class="edit-image"
+                        src="../../../assets/edit.svg"></ion-img>
+                    </span>
+                  </a>
+                </ion-note>
+              </ion-card>
+              <ion-card *ngIf="purchasedDetails?.fulfillmentOrders?.length == 0">
+                <div class="sub-container-none">
+                  No Shipment found
+                </div>
+              </ion-card>
+            </ion-col>
+          </ion-row>
+        </ion-col>
+        <!----->
+        <ion-col size="8" class="information-content-center common-container-bg">
+          <ion-row class="inner-right-row">
+            <ion-col size="12" class="main-container-product">
+              <ion-row class="main-container-product-list">
+                <ion-col size="12" class="">
+                  <ion-row class="ion-no-padding" style="width: 100%;">
+                    <table>
+                      <tr class="header">
+                        <th class="title-container">
+                          <p>Product</p>
+                        </th>
+                        <th style="text-align: end;">
+                          <p>Price</p>
+                        </th>
+                        <th style="text-align: end;">
+                          <p>Quantity</p>
+                        </th>
+                        <th style="text-align: end;">
+                          <p>Subtotal</p>
+                        </th>
+                      </tr>
+                      <tr class="content" *ngFor="let product of purchasedDetails?.orderItems">
+                        <td class="content-container">
+                          <p>{{product?.productName}}</p>
+                        </td>
+                        <td class="text-end">
+                          <p>{{product?.unitPrice | CurrencyPipe }}</p>
+                        </td>
+                        <td class="text-end">
+                          <p>{{product?.quantity}}</p>
+                        </td>
+                        <td style="text-align: end;">
+                          <div>
+                            <p>{{product?.currencyIsoCode | CurrencyPipe }} {{product?.grandTotalAmount | CurrencyPipe }}</p>
+                            <p *ngIf="product.unitPriceTotal != product.grandTotalAmount"
+                              style="text-decoration: line-through; padding-top: 8px;">
+                              {{product?.currencyIsoCode | CurrencyPipe}} {{product?.totalAmount | CurrencyPipe}}</p>
+                          </div>
+                        </td>
+                      </tr>
+                    </table>
+                  </ion-row>
+                </ion-col>
+                <ion-col size="12">
+                  <h4>Totals</h4>
+                  <div>
+                    <ion-label>Subtotal</ion-label>
+                    <ion-note>{{purchasedDetails?.totalAmount | CurrencyPipe }}</ion-note>
+                  </div>
+                  <div>
+                    <ion-label>Shipping cost</ion-label>
+                    <ion-note>{{purchasedDetails?.totalShippingAmount | CurrencyPipe}}</ion-note>
+                  </div>
+                  <div>
+                    <ion-label>Discounts</ion-label>
+                    <ion-note>-{{purchasedDetails?.totalShippingDiscount | CurrencyPipe }}</ion-note>
+                  </div>
+                  <div>
+                    <ion-label>Taxes</ion-label>
+                    <ion-note>{{purchasedDetails?.totalTaxAmount | CurrencyPipe }}</ion-note>
+                  </div>
+                  <div>
+                    <ion-label class="common-sub-header">Totals<span
+                        *ngIf="purchasedDetails?.orderItems.length > 1">&nbsp;({{purchasedDetails.orderItems.length}}
+                        items)</span></ion-label>
+                    <ion-note class="common-sub-header">{{purchasedDetails?.currencyIsoCode | CurrencyPipe}}
+                      {{purchasedDetails?.grandTotalAmount | CurrencyPipe}}</ion-note>
+                  </div>
+                </ion-col>
+                <ion-col size="12">
+                  <div class="notes-textarea-wrapper">
+                    <ion-label class="common-sub-header">Customer notes</ion-label>
+                    <ion-textarea></ion-textarea>
+                  </div>
+                  <div class="notes-textarea-wrapper">
+                    <ion-label class="common-sub-header">Staff only notes</ion-label>
+                    <ion-textarea></ion-textarea>
+                  </div>
+                </ion-col>
+              </ion-row>
+            </ion-col>
+          </ion-row>
+        </ion-col>
+      </ion-row>
+    </swiper-slide>
+  </swiper-container>
+</section>

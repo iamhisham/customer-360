@@ -1,0 +1,133 @@
+<section class="wrapper">
+  <!-- <ion-header class="ion-no-border">
+    <ion-toolbar>
+      <ion-grid class="ion-no-padding">
+        <ion-row class="row-wrapper">
+          <ion-col class="title-column">
+            <div lines="none" class="title-content  ion-no-margin ion-no-padding">
+              <ion-icon name="arrow-back" class="back-icon" style="cursor: pointer;" (click)="onCancel()"></ion-icon>
+              <h1>Category Details</h1>
+            </div>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </ion-toolbar>
+  </ion-header> -->
+  <ion-content>
+    <div class="category-header-text-backbtn-wrap">
+      <ion-icon name="arrow-back" class="back-icon ion-margin-end cursor-pointer" (click)="onCancel()"></ion-icon>
+      <ion-label>Category Details</ion-label>
+    </div>
+    <form [formGroup]="form" (ngSubmit)="save()" autocomplete="on">
+      <ion-grid>
+        <ion-row>
+          <ion-col>
+            <ion-card class="ion-no-padding ion-no-margin">
+              <ion-grid>
+                <ion-row>
+                  <ion-col size="5.9">
+                    <ion-label>Name<span class="mandatory-field">*</span></ion-label>
+                    <ion-item class="P-T" fill="outline" lines="none">
+                      <ion-input formControlName="name" [(ngModel)]="category.name" name="name"
+                        [ngModelOptions]="{standalone: true}" [disabled]="true"></ion-input>
+                    </ion-item>
+                    <div *ngIf="form.get('name')?.invalid &&(form.get('name')?.dirty || form.get('name')?.touched)">
+                      <div *ngIf="form.get('name')?.hasError('required') || form.get('name')?.errors?.['whitespace']">
+                        <small class=" form-error-message">This is a required field</small>
+                      </div>
+                    </div>
+                  </ion-col>
+                  <ion-col offset=".2" size="5.9">
+                    <ion-label>Priority<span class="mandatory-field">*</span></ion-label>
+                    <ion-item class="P-T" fill="outline" lines="none">
+                      <ion-select label="" labelPlacement="stacked" class="ion-no-padding"
+                        [interfaceOptions]="notifiService.customPopoverOptions" placeholder="-Select-" [ngModelOptions]="{standalone: true}"
+                        [(ngModel)]='category.priority' (ngModelChange)=" onCategoryChange()" formControlName="priority"
+                        interface="popover">
+                        <ion-select-option value="MANDATORY" class="mucustom">Mandatory</ion-select-option>
+                        <ion-select-option value="MEDIUM" class="mucustom">Medium</ion-select-option>
+                        <ion-select-option value="LOW" class="mucustom">Low</ion-select-option>
+                      </ion-select>
+                    </ion-item>
+                    <ng-container
+                      *ngIf="form.get('priority')?.hasError('required') && (form.get('priority')?.touched || form.get('priority')?.dirty)">
+                      <small class="form-error-message">This is a required field</small>
+                    </ng-container>
+                  </ion-col>
+                  <ion-col size="12">
+                    <ion-label>Description</ion-label>
+                    <ion-item class="P-T" fill="outline" lines="none">
+                      <ion-textarea [(ngModel)]="category.description" [ngModelOptions]="{standalone: true}">
+                      </ion-textarea>
+                    </ion-item>
+                  </ion-col>
+                  <ion-col size="12" class="heading-1">
+                    <div>
+                      <ion-label slot="start">Rate Limit</ion-label>
+                    </div>
+                  </ion-col>
+                  <ion-col size="12" class="P-T">
+                    <ion-label>Number of message Per Day/Week/Month</ion-label>
+                  </ion-col>
+                  <ion-col size="5.9" style="padding-bottom: 8px;">
+                    <ion-item fill="outline" lines="none">
+                      <ion-select label="" labelPlacement="stacked" class="ion-no-padding" [ngModelOptions]="{standalone: true}"
+                        [interfaceOptions]="notifiService.customPopoverOptions" [(ngModel)]="rateLimit_type"
+                        [disabled]="category.priority === 'MANDATORY'" interface="popover">
+                        <ion-select-option value="">-Select-</ion-select-option>
+                        <ion-select-option value="DAY">Per Day</ion-select-option>
+                        <ion-select-option value="WEEK">Per Week</ion-select-option>
+                        <ion-select-option value="MONTH">Per Month</ion-select-option>
+                      </ion-select>
+                    </ion-item>
+                  </ion-col>
+                  <ion-col offset=".2" size="5.9">
+                    <ion-label></ion-label>
+                    <ion-item lines="none" [disabled]="category.priority === 'MANDATORY' || rateLimit_type === ''"
+                      fill="outline">
+                      <ion-input type="number" inputmode="numeric" (keypress)="numericOnly($event)" min="1" step="1"
+                        [(ngModel)]="rateLimit_value" formControlName="rateLimit" [ngModelOptions]="{standalone: true}"
+                        onkeypress="return event.charCode >= 48">
+                      </ion-input>
+                    </ion-item>
+                    <ng-container
+                      *ngIf="form.get('priority')?.hasError('required') && (form.get('priority')?.touched || form.get('priority')?.dirty)">
+                      <small class="form-error-message">This is a required field</small>
+                    </ng-container>
+                  </ion-col>
+                  <ion-col size="12" class="heading-1">
+                    <ion-label>Time to live (Days)</ion-label>
+                  </ion-col>
+                  <ion-col size="12" class="P-T">
+                    <div>
+                      <ion-note slot="start">This field is applicable only for push
+                        notification</ion-note>
+                    </div>
+                  </ion-col>
+                  <ion-col size="6">
+                    <ion-item fill="outline" lines="none">
+                      <ion-input type="number" inputmode="numeric" (keypress)="numericOnly($event)" [ngModelOptions]="{standalone: true}"
+                        formControlName="timetoliveLimit" [(ngModel)]="category.ttl" min="1" max="28">
+                      </ion-input>
+                    </ion-item>
+                    <ng-container *ngIf="form.get('timetoliveLimit')?.invalid">
+                      <small class="form-error-message">Value must be 1 to 28</small>
+                    </ng-container>
+                  </ion-col>
+                </ion-row>
+              </ion-grid>
+            </ion-card>
+          </ion-col>
+        </ion-row>
+        <ion-buttons class="ion-margin-bottom">
+          <ion-button class="primary-button" (click)="save()" [disabled]="!form.valid" color="primary">
+            <ion-label>Save</ion-label>
+          </ion-button>
+          <ion-button class="secondary-button" (click)="onCancel()" color="secondary">
+            <ion-label>Cancel</ion-label>
+          </ion-button>
+        </ion-buttons>
+      </ion-grid>
+    </form>
+  </ion-content>
+</section>

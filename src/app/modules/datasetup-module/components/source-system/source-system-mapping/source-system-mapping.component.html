@@ -1,0 +1,1351 @@
+<ion-app>
+  <ion-content class="whole-container-padding">
+    <div class="create-or-edit-sourcesystem-heading">
+      <ion-label>{{ !sourceSystemUuid ? 'Create Source System' : 'Edit Source System'}}</ion-label>
+    </div>
+    <ion-row>
+      <ion-col size="12" class="ion-no-padding">
+        <div class="wizard-wrpr">
+          <app-progress-bar-component [progressbarObj]="filteredProgressBar"
+            #progressWizard></app-progress-bar-component>
+        </div>
+        <div
+          *ngIf="sourceSystemDetails.category != 'IMPORT' || !sourceSystemDetails.category || !sourceSystemDetails.category.length">
+          <div [hidden]="progressWizard.currentActive !== 1">
+            <ng-container *ngTemplateOutlet="source_system">
+            </ng-container>
+          </div>
+          <div [hidden]="progressWizard.currentActive !== 2">
+            <ng-container *ngTemplateOutlet="connections">
+            </ng-container>
+          </div>
+          <div [hidden]="progressWizard.currentActive !== 3">
+            <ng-container *ngTemplateOutlet="object_mapping">
+            </ng-container>
+          </div>
+          <div [hidden]="progressWizard.currentActive !== 4">
+            <ng-container *ngTemplateOutlet="scheduler">
+            </ng-container>
+          </div>
+        </div>
+        <div *ngIf="sourceSystemDetails.category == 'IMPORT'">
+          <div [hidden]="progressWizard.currentActive !== 1">
+            <ng-container *ngTemplateOutlet="source_system">
+            </ng-container>
+          </div>
+          <div [hidden]="progressWizard.currentActive !== 2">
+            <ng-container *ngTemplateOutlet="object_mapping">
+            </ng-container>
+          </div>
+        </div>
+      </ion-col>
+    </ion-row>
+  </ion-content>
+</ion-app>
+
+<!-- Add Source system -->
+<ng-template #source_system>
+  <div class="source-system-all">
+    <div class="header">
+      <ion-title>Add Source System</ion-title>
+    </div>
+    <div class="content" style="min-height: calc(100vh - 425px);; overflow-y: auto;">
+      <ion-row>
+        <ion-col style="padding-inline-end: 16px;">
+          <ion-label>Name</ion-label>
+          <ion-item fill="outline" lines="none">
+            <ion-input [(ngModel)]='sourceSystemDetails.name' type="text" autocomplete="off"></ion-input>
+          </ion-item>
+        </ion-col>
+        <ion-col style="padding-inline-start: 16px;">
+          <ion-label>Source System Type</ion-label>
+          <ion-item fill="outline" lines="none"
+            [ngStyle]="{'--background': sourceSystemUuid ? 'var(--gray-out-color)' : ''}">
+            <ion-select label="" labelPlacement="stacked"
+              (ionChange)="getSourceSystemDetails(sourceSystemDetails.sourceSystemStoreId)" class="ion-no-padding"
+              [(ngModel)]='sourceSystemDetails.sourceSystemStoreId'
+              [interfaceOptions]="commonService.customPopoverOptions" placeholder="-Select-" name="Source System Name"
+              interface="popover" [disabled]="sourceSystemUuid" style="opacity: 1;">
+              <ion-select-option *ngFor="let data of sourceSystemStoreList" [value]="data.id">{{data.name}}
+              </ion-select-option>
+            </ion-select>
+          </ion-item>
+        </ion-col>
+        <ion-col *ngIf="sourceSystemDetails.category == 'IMPORT'" style="padding-inline-start: 0px;
+        padding-inline-end: 0px;">
+          <ion-label>Csv Separator</ion-label>
+          <ion-item fill="outline" lines="none">
+            <ion-select label="" labelPlacement="stacked" class="ion-no-padding"
+              [(ngModel)]='sourceSystemDetails.configuration.csvSeperator'
+              [interfaceOptions]="commonService.customPopoverOptions" placeholder="-Select-" name="Source System Name"
+              interface="popover" [disabled]="sourceSystemUuid" style="opacity: 1;">
+              <ion-select-option [value]='","'>Comma ( , )</ion-select-option>
+              <ion-select-option [value]='"\t"'>Tab ( \t )</ion-select-option>
+              <ion-select-option [value]='" "'>Space ( )</ion-select-option>
+              <ion-select-option [value]='":"'>Semi Colon ( : )</ion-select-option>
+            </ion-select>
+          </ion-item>
+        </ion-col>
+        <ion-col size="12">
+          <ion-label>Description</ion-label>
+          <ion-item fill="outline" lines="none">
+            <ion-textarea [(ngModel)]='sourceSystemDetails.description' type="text"
+              style="height: 88px;"></ion-textarea>
+          </ion-item>
+        </ion-col>
+        <ion-col size="6" class="image-upload">
+          <ion-label>Upload Image</ion-label>
+          <div class="outer-div" *ngIf="!sourceSystemDetails?.imgBase64" (click)="imgUpload.click()">
+            <div class="inner-div">
+              <ion-icon name="arrow-up-outline"></ion-icon>
+              <input style="display: none;" #imgUpload type="file" (change)="handleImageUpload($event)"
+                accept="image/*">
+            </div>
+          </div>
+          <div class="images-render" *ngIf="sourceSystemDetails.imgBase64">
+            <div class="image-container" (mouseenter)="showDeleteButton = true" (mouseleave)="showDeleteButton = false">
+              <ion-img [src]="sourceSystemDetails.imgBase64" alt="Uploaded Image"></ion-img>
+              <ion-button class="delete-button" *ngIf="showDeleteButton" (click)="deleteImage()">
+                <ion-icon name="trash-outline"></ion-icon>
+              </ion-button>
+            </div>
+          </div>
+        </ion-col>
+      </ion-row>
+    </div>
+    <ion-footer class="ion-no-border">
+      <ion-row class="step2-btns-row">
+        <ion-col size="6">
+          <div class="btns-wrapper" style="justify-content: start;">
+            <button class="ion-no-margin step2-back-btn" fill="clear" (click)="exitModel()">
+              <ion-label color="primary-color">Cancel</ion-label>
+            </button>
+          </div>
+        </ion-col>
+        <ion-col size="6">
+          <div class="btns-wrapper">
+            <button class="ion-no-margin step2-next-btn" (click)="nextContainer()">
+              <ion-label>Next</ion-label>
+            </button>
+          </div>
+        </ion-col>
+      </ion-row>
+    </ion-footer>
+  </div>
+</ng-template>
+
+<!-- connection -->
+<ng-template #connections>
+  <div class="connection-step2-container">
+    <ion-row class="steps-row">
+      <ion-col size="6" class="ion-no-padding connections-step2">
+        <ion-label class="title-heading" color="primary-text">Connection</ion-label>
+      </ion-col>
+      <ion-col size="6" class="ion-no-padding connections-step2" style="display: flex; justify-content: end;">
+        <ion-button class="tst-connection-btn" (click)="testConnection()">
+          <ion-label>Test Connection</ion-label>
+        </ion-button>
+      </ion-col>
+    </ion-row>
+    <ion-row *ngIf="sourceSystemDetails.category == 'DATABASE'">
+      <ion-col size="12" class="ion-no-padding" class="content-scroll-height customScroller">
+        <ion-card class="connections-step2-card-container">
+          <ion-row>
+            <ion-col size="6" class="ion-no-padding padding-inline-end-10px">
+              <div class="input-field-wrapper">
+                <ion-label class="input-label" color="tertiary-text">Source System Category</ion-label>
+                <input style="background: var(--gray-out-color); color: var(--ion-color-primary-text)"
+                  [ngModel]='sourceSystemDetails.category' [readonly]='true' type="text" value="ORACLE" />
+              </div>
+            </ion-col>
+            <ion-col size="6" class="ion-no-padding padding-inline-start-10px">
+              <div class="input-field-wrapper">
+                <ion-label class="input-label" color="tertiary-text">Source System SubCategory</ion-label>
+                <input style="background: var(--gray-out-color); color: var(--ion-color-primary-text)"
+                  [ngModel]='sourceSystemDetails.subCategory' [readonly]='true' type="text" value="ORACLE" />
+              </div>
+            </ion-col>
+            <ion-col size="6" class="ion-no-padding padding-inline-end-10px">
+              <div class="input-field-wrapper">
+                <ion-label class="input-label" color="tertiary-text">Hostname</ion-label>
+                <input type="text" [(ngModel)]='connection.host' />
+              </div>
+            </ion-col>
+            <ion-col size="6" class="ion-no-padding padding-inline-start-10px">
+              <div class="input-field-wrapper">
+                <ion-label class="input-label" color="tertiary-text">Port</ion-label>
+                <input type="number" value="1521" [(ngModel)]='connection.port' />
+              </div>
+            </ion-col>
+            <ion-col size="6" class="ion-no-padding padding-inline-end-10px">
+              <div class="input-field-wrapper">
+                <ion-label class="input-label" color="tertiary-text">Username</ion-label>
+                <input type="text" [(ngModel)]='connection.user' />
+              </div>
+            </ion-col>
+            <ion-col size="6" class=" ion-no-padding padding-inline-start-10px">
+              <div class="input-field-wrapper">
+                <ion-label class="input-label" color="tertiary-text">Password</ion-label>
+                <input type="password" [(ngModel)]='connection.password' />
+              </div>
+            </ion-col>
+            <ion-col size="6" class="ion-no-padding padding-inline-end-10px">
+              <div class="input-field-wrapper">
+                <ion-label class="input-label" color="tertiary-text">SID</ion-label>
+                <input type="text" value="orcl" [(ngModel)]='connection.sid' />
+              </div>
+            </ion-col>
+            <ion-col size="6" class=" ion-no-padding padding-inline-start-10px">
+              <div class="input-field-wrapper">
+                <ion-label class="input-label" color="tertiary-text">Schema</ion-label>
+                <input type="text" [(ngModel)]='connection.schema' />
+              </div>
+            </ion-col>
+            <ion-col size="6" class="ion-no-padding padding-inline-end-10px">
+              <div class="input-field-wrapper">
+                <ion-label class="input-label" color="tertiary-text">Connection pool size</ion-label>
+                <input type="number" value="100" [(ngModel)]='connection.connectionPoolSize' />
+              </div>
+            </ion-col>
+            <ion-col size="6" class="ion-no-padding padding-inline-start-10px">
+              <div class="input-field-wrapper">
+                <ion-label class="input-label" color="tertiary-text">Timeout</ion-label>
+                <input type="text" [(ngModel)]='connection.timeOut' />
+              </div>
+            </ion-col>
+          </ion-row>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+    <ion-row *ngIf="sourceSystemDetails.category != 'DATABASE'">
+      <ion-col class="content-scroll-height customScroller">
+        <!-- /////another category's//// -->
+      </ion-col>
+    </ion-row>
+    <ion-row class="step2-btns-row">
+      <ion-col size="6">
+        <div class="btns-wrapper" style="justify-content: start;">
+          <button class="ion-no-margin step2-back-btn" fill="clear" (click)="exitModel()">
+            <ion-label color="primary-color">Cancel</ion-label>
+          </button>
+        </div>
+      </ion-col>
+      <ion-col size="6">
+        <div class="btns-wrapper">
+          <button class="ion-no-margin step2-back-btn" fill="clear" (click)="backContainer()">
+            <ion-label color="primary-color">Back</ion-label>
+          </button>
+          <button class="ion-no-margin step2-next-btn" (click)="nextContainer()">
+            <ion-label>Next</ion-label>
+          </button>
+        </div>
+      </ion-col>
+    </ion-row>
+  </div>
+</ng-template>
+
+<ng-template #object_mapping>
+  <ion-row class="wrapper-object">
+    <ion-col *ngIf="viewType != 'OBJECT_MAPPING'" class="breadcrumbs-container">
+      <div>
+        <ion-icon (click)="resetFlow()" class="icon" name="chevron-back-outline"></ion-icon>
+      </div>
+      <ion-breadcrumbs>
+        <ion-breadcrumb>
+          <ion-label>Object Mapping</ion-label>
+          <ion-img slot="separator" src="../../../assets/Line.svg"></ion-img>
+        </ion-breadcrumb>
+        <ion-breadcrumb>
+          <ion-label>{{breadcrumb.type}} ({{breadcrumb.name}})</ion-label>
+        </ion-breadcrumb>
+      </ion-breadcrumbs>
+    </ion-col>
+    <ion-col size="12" #outerContainerScrollRef class="content-scroll-height customScroller"
+      style="height: calc(-397px + 100vh);" (pointermove)="buildNewLineWhileDragging($event)"
+      (pointerup)="stopDragging()">
+      <ion-row style="width: 100%; display: contents;">
+        <div class="content">
+          <svg [style.height]="(outerContainer?.bottom - outerContainer?.top)"
+            [style.width]="(outerContainer?.right - outerContainer?.left)">
+            <path *ngIf="newLine" class="movable-line" [attr.d]="newLine.path"></path>
+            <polygon *ngIf="newLine" points="0,0 10,5 0,10" class="arrow"
+              [style.transform]="'translate(' + (newLine.arrowPath.x) + 'px, ' + (newLine.arrowPath.y )+ 'px)'" />
+            <ng-container *ngFor="let mappingLine of mappingLines; let index = index">
+              <g class="line" [ngClass]="{'bold-line': mappingLine.isSelected}">
+                <!-- <circle *ngIf="newLine" [attr.cx]="mappingLine.rectangle.x" [attr.cy]="(mappingLine.rectangle.y + 5)"
+                  r="3.5" class="rectangle" /> -->
+                <path [attr.d]="mappingLine.path" (pointerdown)="selectLine(mappingLine, index)"
+                  (pointerup)="$event.stopPropagation();">
+                </path>
+                <!-- <polygon points="0,0 10,5 0,10" class="arrow"
+                  [style.transform]="'translate(' + (mappingLine.arrowPath.x) + 'px, ' + (mappingLine.arrowPath.y )+ 'px)'"
+                  [ngClass]="{'bold-arrow': mappingLine.isSelected}" /> -->
+              </g>
+            </ng-container>
+          </svg>
+        </div>
+        <ion-col size="12" class="ion-no-padding" style="max-height: calc(100vh - 422px);">
+          <ion-row style="height: 100%; justify-content: space-between;">
+            <ion-col size="4" class="ion-no-padding" style="height: 100%;
+            background: #fafafa;">
+              <ion-row>
+                <ion-col size="12" class="ion-no-padding" style="z-index: 1;">
+                  <ion-card class="card-obj">
+                    <ion-label class="title-label">Source system object</ion-label>
+                    <ion-button *ngIf="viewType == 'OBJECT_MAPPING'" (click)="openModel('SOURCE')">
+                      <ion-img src="../../assets/save.svg"></ion-img>
+                      <ion-label>Add Source system object</ion-label>
+                    </ion-button>
+                  </ion-card>
+                </ion-col>
+              </ion-row>
+              <ion-row style="height: calc(100vh - 500px);display: flex;">
+                <ion-col size="12" class="ion-no-padding">
+                  <div class="outer-layer" style="margin-bottom: 20px;"
+                    *ngFor="let source of sourceList; let index = index">
+                    <div class="box" [ngStyle]="{'margin-bottom.px': viewType !== 'OBJECT_MAPPING' ? 12 : 0}">
+                      <div class="heading"
+                        [ngClass]="{'attr-mapped': sourceMappingRef[source.name], 'attr-hover': (mouseHoverAttrDetails.sourceObjectName == source.name && !mouseHoverAttrDetails.sourceAttr)}">
+                        <div class="B-R-3">
+                          <div class="edit-contatiner">
+                            <ion-label class="title">{{source.name}}
+                              <p style="margin-top: 4px;" *ngIf="viewType != 'OBJECT_MAPPING'">
+                                ( Audit: {{sourceAuditAttrMap[source.name] || ''}})&nbsp;
+                                <ion-icon name="create-outline"
+                                  (click)="openEditAuditAttribute(source.name)"></ion-icon>
+                              </p>
+                            </ion-label>
+                            <ion-icon *ngIf="viewType == 'OBJECT_MAPPING' && sourceMappingRef[source.name]"
+                              class="edit-icon" title="Attribute mapping"
+                              (click)="switchToAttributeView('SOURCE', source.name)" name="create-outline"></ion-icon>
+                          </div>
+                          <div *ngIf="viewType != 'OBJECT_MAPPING'" class="source-icon">
+                            <ion-icon class="source-arrow P-E-10" *ngIf="!source.isExpand" name="chevron-down-sharp"
+                              (click)="toggleObject($event, source, sourceList)"></ion-icon>
+                            <ion-icon class="source-arrow P-E-10" *ngIf="source.isExpand" name="chevron-up-sharp"
+                              (click)="toggleObject($event, source, sourceList)"></ion-icon>
+                          </div>
+                          <div *ngIf="viewType !== 'OBJECT_MAPPING' && !source.isExpand" [attr.id]="source.id"
+                            class="source-socket-icon" style="top:16px">
+                            <div class="rectangle-icon"></div>
+                          </div>
+                          <div *ngIf="viewType == 'OBJECT_MAPPING'" (mouseenter)="highlightName('SOURCE', source.name)"
+                            (mouseleave)="resetHighlight()" [attr.id]="source.id" class="source-socket-icon"
+                            (pointerdown)="startDragging($event, source, null)" (pointerup)="$event.stopPropagation();"
+                            style="top:16px">
+                            <div class="rectangle-icon"></div>
+                          </div>
+                          <ion-note *ngIf="viewType == 'OBJECT_MAPPING'" style="color:var(--ion-color-primary-text)"
+                            class="ion-notes">({{(sourceAttrCountMap[source.name] || []).length}} attributes
+                            mapped)</ion-note>
+                        </div>
+                      </div>
+                      <div class="top-container">
+                        <div
+                          [ngClass]="{'attr-mapped': sourceMappingRef[source.name]?.[attr.name], 'attr-hover': (mouseHoverAttrDetails.sourceObjectName == source.name && mouseHoverAttrDetails.sourceAttr == attr.name)}"
+                          *ngFor="let attr of (viewType != 'OBJECT_MAPPING' && source.isExpand ) ? source.attributes : []"
+                          class="body B-R-3">
+                          <ion-label class="label">{{attr.name}} <ion-chip class="enum-chip"
+                              (click)="openEnumPopover($event,attr)" *ngIf="attr.type === 'ENUM'">ENUM</ion-chip>
+                          </ion-label>
+                          <!-- enum -->
+                          <div class="source-socket-icon" (mouseenter)="highlightName('SOURCE', source.name, attr.name)"
+                            (mouseleave)="resetHighlight()" [attr.id]="attr.id"
+                            (pointerdown)="startDragging($event, source, attr)" (pointerup)="$event.stopPropagation();">
+                            <div class="rectangle-icon"></div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </ion-col>
+                <ion-col size="12" *ngIf="!selectedSourceNameList.length" class="ion-no-padding no-data">
+                  <section class="none-data-account" style="display: flex;
+                  justify-content: space-around;">
+                    <div class="main-none-container">
+                      <div class="sub-container-none">
+                        No source object Added
+                      </div>
+                    </div>
+                  </section>
+                </ion-col>
+              </ion-row>
+            </ion-col>
+
+            <!-- <div class="auto-mapping-middle-btn"
+              *ngIf="viewType == 'OBJECT_MAPPING' && selectedSourceNameList.length > 0">
+              <ion-button (click)="autoMappingForObject()">
+                <ion-label>Auto Mapping</ion-label>
+              </ion-button>
+            </div> -->
+
+
+            <!-- <div class="auto-mapping-middle-btn"
+              *ngIf="viewType != 'OBJECT_MAPPING' && selectedSourceNameList.length > 0">
+              <ion-button (click)="autoMapping()">
+                <ion-label>Auto Mapping</ion-label>
+              </ion-button>
+            </div> -->
+            <ion-col size="4" class="ion-no-padding" style="height: 100%;
+            background: #fafafa; ">
+              <ion-row>
+                <ion-col size="12" class="ion-no-padding" style="z-index: 1;">
+                  <ion-card class="card-obj">
+                    <ion-label class="title-label">CDP object</ion-label>
+                    <ion-button *ngIf="viewType == 'OBJECT_MAPPING'" (click)="openModel('TARGET')">
+                      <ion-img src="../../assets/save.svg"></ion-img>
+                      <ion-label>Add CDP object</ion-label>
+                    </ion-button>
+                  </ion-card>
+                </ion-col>
+              </ion-row>
+              <ion-row style="height: calc(100vh - 500px);
+              display: flex;">
+                <ion-col size="12" class="ion-no-padding">
+                  <div class="outer-layer" style="margin-bottom: 20px;"
+                    *ngFor="let target of targetList; let index = index">
+                    <div class="box">
+                      <div class="heading"
+                        [ngClass]="{'attr-mapped': targetMappingRef[target.name], 'attr-hover': (mouseHoverAttrDetails.targetObjectName == target.name && !mouseHoverAttrDetails.targetAttr)}">
+                        <div class="B-L-3">
+                          <div *ngIf="viewType == 'OBJECT_MAPPING'" [attr.id]="target.id"
+                            (mouseenter)="highlightName('TARGET', target.name)" (mouseleave)="resetHighlight()"
+                            class="destination-socket-icon" (pointerup)="stopDragging(target, null)">
+                            <div class="arrow-icon"></div>
+                          </div>
+                          <div *ngIf="viewType != 'OBJECT_MAPPING' && !target.isExpand" [attr.id]="target.id"
+                            class="destination-socket-icon">
+                            <div class="arrow-icon"></div>
+                          </div>
+                          <div *ngIf="viewType != 'OBJECT_MAPPING'" class="destination-icon">
+                            <ion-icon class="obj-arrow" *ngIf="!target.isExpand" name="chevron-down-sharp"
+                              (click)="toggleObject($event, target, targetList)"></ion-icon>
+                            <ion-icon class="obj-arrow" *ngIf="target.isExpand" name="chevron-up-sharp"
+                              (click)="toggleObject($event, target, targetList)"></ion-icon>
+                          </div>
+                          <div>
+                            <div class="edit-contatiner" style="padding-bottom: 4px;">
+                              <ion-label class="title">{{target.name}}</ion-label>
+                              <ion-icon *ngIf="viewType == 'OBJECT_MAPPING' && targetMappingRef[target.name]"
+                                class="edit-icon" (click)="switchToAttributeView('TARGET', target.name)"
+                                title="Attribute mapping" name="create-outline"></ion-icon>
+                            </div>
+                            <ion-note *ngIf="viewType == 'OBJECT_MAPPING'" style="color:var(--ion-color-primary-text)"
+                              class="ion-notes">({{(targetAttrCountMap[target.name] || []).length}} attributes
+                              mapped)</ion-note>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="top-container">
+                        <div
+                          [ngClass]="{'attr-mapped': targetMappingRef[target.name]?.[attr.name], 'attr-hover': (mouseHoverAttrDetails.targetObjectName == target.name && mouseHoverAttrDetails.targetAttr == attr.name)}"
+                          *ngFor="let attr of (viewType != 'OBJECT_MAPPING' && target.isExpand ) ? target.attributes : []"
+                          class="body B-L-3">
+                          <div class="destination-socket-icon" [attr.id]="attr.id"
+                            (pointerup)="stopDragging(target, attr)"
+                            (mouseenter)="highlightName('TARGET', target.name, attr.name)"
+                            (mouseleave)="resetHighlight()">
+                            <div class="arrow-icon"></div>
+                          </div>
+                          <ion-label class="label"
+                            [ngClass]="{'selected-attr': breadcrumb.selectedName === attr.name}">{{attr.name}}
+                            <ion-chip class="enum-chip" (click)="openEnumPopover($event,attr)"
+                              *ngIf="attr.type === 'ENUM'">ENUM</ion-chip>
+
+                            <ion-icon (click)="openModel('MULTIPLE',attr, targetMappingRef[target.name]?.[attr.name])"
+                              title="edit-enum-mapping"
+                              *ngIf="attr.type != 'ENUM' && targetMappingRef[target.name]?.[attr.name]?.length > 1"
+                              class="edit-popover-icon padding-inline-start-10px" name="create-outline"></ion-icon>
+
+                            <ion-icon (click)="openModel('ENUM',attr, targetMappingRef[target.name]?.[attr.name])"
+                              title="edit-enum-mapping"
+                              *ngIf="attr.type === 'ENUM' && targetMappingRef[target.name]?.[attr.name]"
+                              class="edit-popover-icon" name="create-outline"></ion-icon>
+                          </ion-label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </ion-col>
+                <ion-col size="12" *ngIf="!selectedTargetNameList.length" class="ion-no-padding no-data">
+                  <section class="none-data-account" style="display: flex;
+                  justify-content: space-around;">
+                    <div class="main-none-container">
+                      <div class="sub-container-none">
+                        No object Added
+                      </div>
+                    </div>
+                  </section>
+                </ion-col>
+              </ion-row>
+            </ion-col>
+          </ion-row>
+        </ion-col>
+      </ion-row>
+    </ion-col>
+  </ion-row>
+  <ion-row class="step2-btns-row">
+    <ion-col size="6">
+      <div class="btns-wrapper" style="justify-content: start;">
+        <button class="ion-no-margin step2-back-btn" fill="clear" (click)="exitModel()">
+          <ion-label color="primary-color">Cancel</ion-label>
+        </button>
+      </div>
+    </ion-col>
+    <ion-col size="6">
+      <div class="btns-wrapper">
+        <button class="ion-no-margin step2-back-btn" fill="clear" (click)="backContainer()">
+          <ion-label color="primary-color">Back</ion-label>
+        </button>
+        <button class="ion-no-margin step2-next-btn" (click)="nextContainer()">
+          <ion-label
+            *ngIf="sourceSystemDetails.category != 'IMPORT' || !sourceSystemDetails.category || !sourceSystemDetails.category.length">Next</ion-label>
+          <ion-label *ngIf="sourceSystemDetails.category == 'IMPORT'">{{ csvSourceSystemProgressBar.length ==
+            progressWizard.currentActive ? 'Save':
+            'Next'}}</ion-label>
+        </button>
+      </div>
+    </ion-col>
+  </ion-row>
+</ng-template>
+
+<ng-template #scheduler>
+  <ion-row>
+    <ion-col size="12">
+      <ion-row style="padding: 20px 0px;padding-top: 0;">
+        <ion-col size="6" class="scheduler-title-colum">
+          <ion-label class="ion-title-content" color="primary-text">Scheduler Table</ion-label>
+        </ion-col>
+        <ion-col size="6" class="scheduler-add-colum">
+          <ion-button class="add-btn" (click)="openSchdulerModel('SCHEDULER')">
+            <ion-label>
+              Create Scheduler
+            </ion-label>
+          </ion-button>
+        </ion-col>
+        <ion-col size="12" style="height:calc(-455px + 100vh);">
+          <app-table #scheduler_Table [tableDetails]="schedulerTable"></app-table>
+        </ion-col>
+      </ion-row>
+      <ion-row class="step2-btns-row">
+        <ion-col size="6" class="ion-no-padding">
+          <div class="btns-wrapper" style="justify-content: start;">
+            <button class="ion-no-margin step2-back-btn" fill="clear" (click)="exitModel()">
+              <ion-label color="primary-color">Cancel</ion-label>
+            </button>
+          </div>
+        </ion-col>
+        <ion-col size="6" class="ion-no-padding">
+          <div class="btns-wrapper">
+            <button class="ion-no-margin step2-back-btn" fill="clear" (click)="backContainer()">
+              <ion-label color="primary-color">Back</ion-label>
+            </button>
+            <button class="ion-no-margin step2-next-btn" (click)="nextContainer()">
+              <ion-label>{{ sourceSystemProgressBar.length == progressWizard.currentActive ? 'Save':
+                'Next'}}</ion-label>
+            </button>
+          </div>
+        </ion-col>
+      </ion-row>
+    </ion-col>
+  </ion-row>
+</ng-template>
+
+<ion-modal class="adding-source-system" [isOpen]="openModelName == 'SOURCE'" backdropDismiss="false">
+  <ng-template>
+    <ng-container *ngIf="config.sourceSystemObjects.length">
+      <ion-header class="center">
+        <ion-label class="ion-title-content">Source system object</ion-label>
+        <ng-container *ngTemplateOutlet="sourceSystemHeaderButton"></ng-container>
+      </ion-header>
+      <ion-content>
+        <ion-row>
+          <ion-col size="12" class="search-container">
+            <div>
+              <ion-searchbar class="ion-no-padding" placeholder="Search" [(ngModel)]="searchText"></ion-searchbar>
+            </div>
+          </ion-col>
+          <ion-col size="12" style="overflow: auto; padding-top:10px;" class="ion-no-padding list-view customScroller"
+            *ngIf="config.sourceSystemObjects">
+            <ion-item *ngFor="let object of config.sourceSystemObjects | filter : {name: searchText}">
+              <ion-checkbox [(ngModel)]="object.selected" [disabled]="sourceMappingRef[object.name]"></ion-checkbox>
+              <ion-label>{{ object.name }}</ion-label>
+            </ion-item>
+          </ion-col>
+        </ion-row>
+      </ion-content>
+      <ion-footer style="display: flex;" class="ion-no-border">
+        <div class="align-btn">
+          <ion-button class="ion-no-margin cancel-btn" slot="end" fill="clear" (click)="closeModel()">
+            <ion-label style="text-transform: none;">Cancel</ion-label>
+          </ion-button>
+          <ion-button class="ion-no-margin submit-btn" slot="end" (click)="addObjectForMapping('SOURCE')">
+            <ion-label style="text-transform: none;">Add</ion-label>
+          </ion-button>
+        </div>
+      </ion-footer>
+    </ng-container>
+    <ng-container *ngIf="!config.sourceSystemObjects.length">
+      <ion-header class="add-source-sys-header">
+        <ion-label>Add Source System</ion-label>
+        <ng-container *ngTemplateOutlet="sourceSystemHeaderButton"></ng-container>
+      </ion-header>
+      <ion-content>
+        <ion-row style="height: 100%;">
+          <ion-col
+            *ngIf="!config.sourceSystemObjects.length && !selectedSourceNameList.length && !config?.sourceSystemObjects.length && !showloader">
+            <div class="no-data-header">
+              <ion-row>
+                <ion-col class="ion-no-padding no-data">
+                  <section class="none-data-account">
+                    <div class="main-none-container" style="width: 100%;">
+                      <div class="sub-container-none">
+                        Upload Source system object to configure
+                      </div>
+                    </div>
+                  </section>
+                </ion-col>
+              </ion-row>
+            </div>
+          </ion-col>
+          <ion-col *ngIf="config.sourceSystemObjects.length==0 && showloader">
+            <div class="loader">
+              <ion-spinner></ion-spinner>
+            </div>
+          </ion-col>
+        </ion-row>
+      </ion-content>
+      <ion-footer style="display: flex;" class="ion-no-border">
+        <div class="align-btn">
+          <ion-button class="ion-no-margin cancel-btn" slot="end" fill="clear" (click)="closeModel()">
+            <ion-label style="text-transform: none;">Cancel</ion-label>
+          </ion-button>
+          <ion-button class="ion-no-margin submit-btn" slot="end" (click)="uploadSwaggerFile($event)">
+            <ion-label style="text-transform: none;">ADD</ion-label>
+          </ion-button>
+        </div>
+      </ion-footer>
+    </ng-container>
+  </ng-template>
+</ion-modal>
+
+<ion-modal class="adding-source-system" [isOpen]="openModelName=='TARGET'" *ngIf="cdpDataModelList"
+  backdropDismiss="false">
+  <ng-template>
+    <ion-header>
+      <ion-label class="ion-title-content">CDP Objects</ion-label>
+    </ion-header>
+    <ion-content class=" customScroller" style="overflow: auto;">
+      <ion-row>
+        <div class="select-option-container">
+          <ion-col size="5.7">
+            <ion-label class="ion-item-label">Module</ion-label>
+            <ion-item class="padding-top-4px" fill="outline" lines="none">
+              <ion-select label="" labelPlacement="stacked" class="ion-no-padding ion-select" [(ngModel)]='searchModule'
+                [interfaceOptions]="commonService.customPopoverOptions" placeholder="-Select-" name="Source System Name"
+                interface="popover">
+                <ion-select-option value="">All</ion-select-option>
+                <ion-select-option *ngFor="let data of cdpModuleList" [value]="data">{{data}}
+                </ion-select-option>
+              </ion-select>
+            </ion-item>
+          </ion-col>
+          <ion-col size="5.7" offset=".6" class="search-container">
+            <ion-label class="ion-item-label">Search Object</ion-label>
+            <div class="padding-top-4px">
+              <ion-searchbar class="ion-no-padding" placeholder="Search" [(ngModel)]="searchText"></ion-searchbar>
+            </div>
+          </ion-col>
+        </div>
+        <ion-col size="12" class="ion-no-padding" class="toggle-container">
+          <div class="toggle-button">
+            <ion-label>
+              <span class="toggle-text" (click)="toggleExpandCollapse()">{{ hideCdpModulesList.length ? 'Expand All' :
+                'Collapse All' }}</span>
+            </ion-label>
+          </div>
+        </ion-col>
+        <ion-col size="12" class="ion-no-padding list-view customScroller" style="overflow: auto;"
+          *ngIf="cdpDataModelList">
+          <ng-container
+            *ngFor="let object of cdpDataModelList | filter: {name: searchText, module: searchModule, customType: 'CDP_OBJECTS'}; let i = index">
+            <ion-item class="list-heading" style="cursor:pointer;" lines="none" *ngIf="object.showModuleName"
+              (click)="toggleModuleVisibility(object.module)">
+              <ion-icon class="source-arrow P-E-10 pointer-dropdown-icon"
+                [name]=" !hideCdpModulesList.includes(object.module) ? 'chevron-up-sharp' : 'chevron-down-sharp'"></ion-icon>
+              <ion-label>{{ object.module}}</ion-label>
+            </ion-item>
+            <ion-item *ngIf="(!hideCdpModulesList.includes(object.module))" lines="none">
+              <ion-checkbox [(ngModel)]="object.selected" [disabled]="targetMappingRef[object.name]"></ion-checkbox>
+              <ion-label>{{ object.name }}</ion-label>
+            </ion-item>
+          </ng-container>
+        </ion-col>
+        <ion-col size="12" class="ion-no-padding " *ngIf="!cdpDataModelList">
+          <div class="loader">
+            <ion-spinner></ion-spinner>
+          </div>
+        </ion-col>
+      </ion-row>
+    </ion-content>
+    <ion-footer class="ion-no-border">
+      <div class="bottom-btns">
+        <ion-button class="ion-no-margin cancel-btn" slot="end" fill="clear" (click)="closeModel()">
+          <ion-label style="text-transform: none;">Cancel</ion-label>
+        </ion-button>
+        <ion-button class="ion-no-margin submit-btn" slot="end" (click)="addObjectForMapping('TARGET')">
+          <ion-label style="text-transform: none;">Add</ion-label>
+        </ion-button>
+      </div>
+    </ion-footer>
+  </ng-template>
+</ion-modal>
+
+<ion-modal class="adding-enum" [isOpen]="openModelName=='ENUM'" backdropDismiss="false">
+  <ng-template>
+    <ion-header>
+      <ion-label class="ion-title-content">Enum Value Mapping</ion-label>
+    </ion-header>
+    <ion-content class="customScroller">
+      <ion-row>
+        <ion-col size="6" class="padding-inline-end-6px">
+          <ion-label>Source system object name</ion-label>
+          <ion-item fill="outline" lines="none">
+            <ion-input type="text" [ngModel]="editAttributeDetails.sourceName" readonly="true"
+              autocomplete="off"></ion-input>
+          </ion-item>
+        </ion-col>
+        <ion-col size="6" class="padding-inline-start-6px">
+          <ion-label>Source system attribute name</ion-label>
+          <ion-item fill="outline" lines="none">
+            <ion-input type="text" readonly="true" [ngModel]="editAttributeDetails.sourceAttr"
+              autocomplete="off"></ion-input>
+          </ion-item>
+        </ion-col>
+        <ion-col size="6" class="padding-inline-end-6px">
+          <ion-label>CDP Object name</ion-label>
+          <ion-item fill="outline" lines="none">
+            <ion-input type="text" readonly="true" [ngModel]="editAttributeDetails.targetName"
+              autocomplete="off"></ion-input>
+          </ion-item>
+        </ion-col>
+        <ion-col size="6" class="padding-inline-start-6px">
+          <ion-label>CDP Attribute name</ion-label>
+          <ion-item fill="outline" lines="none">
+            <ion-input type="text" readonly="true" [ngModel]="editAttributeDetails.targetAttr"
+              autocomplete="off"></ion-input>
+          </ion-item>
+        </ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col size="12">
+          <ion-row *ngFor="let row of editAttributeDetails.mappingList; let i = index">
+            <ion-col size="6" class="padding-inline-end-6px">
+              <ion-label *ngIf="i==0">Source system enums</ion-label>
+              <ion-item *ngIf="editAttributeDetails.sourceEnumList?.length > 0" fill="outline" lines="none">
+                <ion-select [(ngModel)]='row.sourceEnum' label="" labelPlacement="stacked" class="ion-no-padding "
+                  [interfaceOptions]="commonService.customPopoverOptions" placeholder="-Select-"
+                  name="Source System Name" interface="popover">
+                  <ion-select-option *ngFor="let option of editAttributeDetails.sourceEnumList" [value]="option">{{
+                    option
+                    }}</ion-select-option>
+                </ion-select>
+              </ion-item>
+              <ion-item fill="outline" *ngIf="editAttributeDetails.sourceEnumList?.length == 0" lines="none">
+                <ion-input type="text" [(ngModel)]='row.sourceEnum' autocomplete="off"></ion-input>
+              </ion-item>
+            </ion-col>
+            <ion-col size="6" class="padding-inline-start-6px">
+              <ion-label *ngIf="i==0">CDP enums</ion-label>
+              <ion-item fill="outline" lines="none">
+                <ion-select [(ngModel)]='row.targetEnum' label="" labelPlacement="stacked" class="ion-no-padding "
+                  [interfaceOptions]="commonService.customPopoverOptions" placeholder="-Select-" name="CDP Name"
+                  interface="popover">
+                  <ion-select-option *ngFor="let option of editAttributeDetails.targetEnumList" [value]="option">{{
+                    option
+                    }}</ion-select-option>
+                </ion-select>
+              </ion-item>
+            </ion-col>
+            <ion-col size="12" class="end-slot ">
+              <ion-button *ngIf="i!=0" (click)="deleteRow(i)">
+                <ion-icon name="trash-outline"></ion-icon>
+              </ion-button>
+              <ion-button (click)="addRow()">
+                <ion-icon name="add-outline"></ion-icon>
+              </ion-button>
+            </ion-col>
+          </ion-row>
+        </ion-col>
+      </ion-row>
+    </ion-content>
+    <ion-footer class="ion-no-border">
+      <ion-toolbar>
+        <ion-button class="ion-no-margin cancel-btn" slot="end" fill="clear" (click)="closeModel()">
+          <ion-label style="text-transform: none;">Cancel</ion-label>
+        </ion-button>
+        <ion-button class="ion-no-margin submit-btn" slot="end" (click)="updateAttributeMapping()">
+          <ion-label style="text-transform: none;">Confirm</ion-label>
+        </ion-button>
+      </ion-toolbar>
+    </ion-footer>
+  </ng-template>
+</ion-modal>
+
+<ion-modal class="adding-enum" [isOpen]="openModelName=='MULTIPLE'" backdropDismiss="false">
+  <ng-template>
+    <ion-header>
+      <ion-label class="ion-title-content">Multiple Attribute Mapping</ion-label>
+    </ion-header>
+    <ion-content class="customScroller">
+      <ion-row>
+        <ion-col size="6" class="padding-inline-end-6px">
+          <ion-label>CDP Object name</ion-label>
+          <ion-item fill="outline" lines="none">
+            <ion-input type="text" readonly="true" [ngModel]="editAttributeDetails.targetName"
+              autocomplete="off"></ion-input>
+          </ion-item>
+        </ion-col>
+        <ion-col size="6" class="padding-inline-start-6px">
+          <ion-label>CDP Attribute name</ion-label>
+          <ion-item fill="outline" lines="none">
+            <ion-input type="text" readonly="true" [ngModel]="editAttributeDetails.targetAttr"
+              autocomplete="off"></ion-input>
+          </ion-item>
+        </ion-col>
+        <ion-col size="12">
+          <ion-label>Multiple Attribute Merge Condition</ion-label>
+          <ion-item fill="outline" lines="none">
+            <ion-select label="" [(ngModel)]="editAttributeDetails.attrMergeCond" labelPlacement="stacked"
+              class="ion-no-padding " [interfaceOptions]="commonService.customPopoverOptions" placeholder="-Select-"
+              name="CDP Name" interface="popover">
+              <ion-select-option [value]='"MERGE_WITH_COMMA"'>MERGE WITH COMMA</ion-select-option>
+              <ion-select-option [value]='"MERGE_WITH_SPACE"'>MERGE WITH SPACE</ion-select-option>
+              <ion-select-option [value]='"MERGE_WITH_HYPEN"'>MERGE WITH HYPEN</ion-select-option>
+              <ion-select-option [value]='"SCRIPT"'>SCRIPT</ion-select-option>
+            </ion-select>
+          </ion-item>
+        </ion-col>
+        <ion-col size="12" *ngIf="editAttributeDetails.attrMergeCond =='SCRIPT'">
+          <ion-label>Multiple Attribute Merge Script</ion-label>
+          <ion-item fill="outline" lines="none">
+            <ion-textarea [(ngModel)]="editAttributeDetails.attrMergeScript" style="height: 88px;"
+              class="code-area"></ion-textarea>
+          </ion-item>
+        </ion-col>
+      </ion-row>
+    </ion-content>
+    <ion-footer class="ion-no-border">
+      <ion-toolbar>
+        <ion-button class="ion-no-margin cancel-btn" slot="end" fill="clear" (click)="closeModel()">
+          <ion-label style="text-transform: none;">Cancel</ion-label>
+        </ion-button>
+        <ion-button class="ion-no-margin submit-btn" slot="end" (click)="updateAttributeMapping()">
+          <ion-label style="text-transform: none;">Save</ion-label>
+        </ion-button>
+      </ion-toolbar>
+    </ion-footer>
+  </ng-template>
+</ion-modal>
+
+<ion-modal class="exit-conformation" [isOpen]="exitConformation == 'OPEN'" backdropDismiss="false">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>Confirm the action</ion-title>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content>
+      <ion-row>
+        <ion-col size="12">
+          <ion-label>Do you really want to exit</ion-label>
+        </ion-col>
+      </ion-row>
+    </ion-content>
+    <ion-footer class="ion-no-border">
+      <ion-toolbar>
+        <ion-button class="ion-no-margin cancel-btn" slot="end" fill="clear" (click)="exitModel()">
+          <ion-label style="text-transform: none;">Cancel</ion-label>
+        </ion-button>
+        <ion-button class="ion-no-margin submit-btn" slot="end" (click)="exitModel()">
+          <ion-label style="text-transform: none;">Exit</ion-label>
+        </ion-button>
+      </ion-toolbar>
+    </ion-footer>
+  </ng-template>
+</ion-modal>
+
+<ng-template #sourceSystemHeaderButton>
+  <div *ngIf="sourceSystemDetails.category == 'APPLICATION' && sourceSystemDetails.subCategory == 'REST'">
+    <input type="file" (change)="uploadSwaggerFile($event)" style="display: none;" #fileInput accept=".json" />
+    <ion-button class="ion-no-margin submit-btn" slot="end" (click)="fileInput.click()">
+      <ion-img src="../../../assets/upload.svg"></ion-img>
+      <ion-label style="text-transform: none;">Upload Swagger</ion-label>
+    </ion-button>
+  </div>
+  <div *ngIf="sourceSystemDetails.category == 'DATABASE'">
+    <ion-button class="ion-no-margin submit-btn" (click)="fetchTableDatas()" slot="end">
+      <ion-icon name="reload-outline"></ion-icon>
+      <ion-label style="text-transform: none;">Fetch Table Definition</ion-label>
+    </ion-button>
+  </div>
+  <div *ngIf="sourceSystemDetails.category == 'IMPORT'">
+    <ion-button class="ion-no-margin submit-btn" (click)="uploadCsv('IMPORT')" slot="end">
+      <ion-icon name="reload-outline"></ion-icon>
+      <ion-label style="text-transform: none;">Upload Csv </ion-label>
+    </ion-button>
+  </div>
+  <div *ngIf="sourceSystemDetails.category == 'APPLICATION' && sourceSystemDetails.subCategory == 'SOAP'">
+    <ion-button class="ion-no-margin submit-btn" slot="end">
+      <ion-img src="../../../assets/upload.svg"></ion-img>
+      <ion-label style="text-transform: none;">Upload WSDL</ion-label>
+    </ion-button>
+  </div>
+</ng-template>
+
+<ion-popover #popover class="popover-style" [isOpen]="popoverDetails.present == true"
+  (didDismiss)="popoverDetails.present = false">
+  <ng-template>
+    <ion-item *ngFor="let value of popoverDetails.content">
+      <ion-label>{{ value }}</ion-label>
+    </ion-item>
+  </ng-template>
+</ion-popover>
+
+<ng-template #schedularComponentCreate>
+  <ion-header class="schedular-create-model-header">
+    <ion-row style="width: 100%;">
+      <ion-col size="12" class="ion-no-padding" style="display: flex;justify-content: space-between;">
+        <ion-label class="ion-title-content">Scheduler Create</ion-label>
+        <div *ngIf="!schedulerPage" (click)="closeModel()">
+          <ion-icon name="close-outline"></ion-icon>
+        </div>
+      </ion-col>
+      <ion-col size="12">
+        <div class="wizard-wraper">
+          <app-progress-bar-component [progressbarObj]="schedularProgressBar" #progressBar></app-progress-bar-component>
+        </div>
+      </ion-col>
+    </ion-row>
+  </ion-header>
+  <ion-content class="schedular-create-model-content">
+    <ion-row>
+      <ion-col size="12" class="ion-no-padding">
+        <div [hidden]="progressBar.currentActive !== 1">
+          <ng-container *ngTemplateOutlet="basic_details">
+          </ng-container>
+        </div>
+        <div [hidden]="progressBar.currentActive !== 2">
+          <ng-container *ngTemplateOutlet="payload">
+          </ng-container>
+        </div>
+        <div [hidden]="progressBar.currentActive !== 3">
+          <ng-container *ngTemplateOutlet="occurance">
+          </ng-container>
+        </div>
+        <ng-template #basic_details>
+          <ion-row class="basic-details-scheduler">
+            <ion-col size="12" class="ion-no-padding">
+              <ion-label class="ion-title-content">Basic Details</ion-label>
+            </ion-col>
+
+            <ion-col size="12" *ngIf="!schedulerPage" class="ion-no-padding input first">
+              <ion-label>Schedule Name</ion-label>
+              <ion-item fill="outline" lines="none">
+                <ion-input [(ngModel)]='schedulersDetails.name' type="text" placeholder="Schedule Name"
+                  autocomplete="off"></ion-input>
+              </ion-item>
+            </ion-col>
+            <!-- schedular create > sourceSystemDetails -->
+            <ion-col size="12" *ngIf="schedulerPage && !schedulerEditId" class="ion-no-padding input first">
+              <ion-label> Source System</ion-label>
+              <ion-item fill="outline" lines="none">
+                <ion-select (ionChange)="ChangeScheduleName(sourceSystemDetails)" label="" labelPlacement="stacked"
+                  class="ion-no-padding" [(ngModel)]="sourceSystemDetails"
+                  [interfaceOptions]="commonService.customPopoverOptions" placeholder="-Select-"
+                  name="Source System Name" interface="popover">
+                  <ion-select-option *ngFor="let tags of sourceSystemList" [value]="tags"> {{tags.name}}
+                  </ion-select-option>
+                </ion-select>
+              </ion-item>
+            </ion-col>
+            <!-- schedular edit > sourceSystemDetails.name -->
+            <ion-col size="12" *ngIf="schedulerPage && schedulerEditId" class="ion-no-padding input first">
+              <ion-label> Source System</ion-label>
+              <ion-item fill="outline" lines="none">
+                <ion-select (ionChange)="ChangeScheduleName(sourceSystemDetails)" label="" labelPlacement="stacked"
+                  class="ion-no-padding" [(ngModel)]="sourceSystemDetails.name"
+                  [interfaceOptions]="commonService.customPopoverOptions" placeholder="-Select-"
+                  name="Source System Name" interface="popover">
+                  <ion-select-option *ngFor="let tags of sourceSystemList" [value]="tags.name"> {{tags.name}}
+                  </ion-select-option>
+                </ion-select>
+              </ion-item>
+            </ion-col>
+
+            <ion-col size="12" *ngIf="schedulerPage" class="ion-no-padding input first">
+              <ion-label>Schedule Name</ion-label>
+              <ion-item fill="outline" lines="none">
+                <ion-input [(ngModel)]='schedulersDetails.name' type="text" placeholder="Schedule Name"
+                  autocomplete="off"></ion-input>
+              </ion-item>
+            </ion-col>
+            <ion-col size="12" class="ion-no-padding input first">
+              <ion-label>Description</ion-label>
+              <ion-item fill="outline" lines="none">
+                <ion-textarea [(ngModel)]='schedulersDetails.description' placeholder="Description text here"
+                  type="text" style="height: 88px;"></ion-textarea>
+              </ion-item>
+            </ion-col>
+          </ion-row>
+        </ng-template>
+        <ng-template #payload>
+          <ion-row>
+            <ion-col class="flow-mapping customScroller">
+              <app-flow-chart (searchEvent)="onSearch($event)" [stepNameList]="mappedSourceObjectList"
+                [stepList]="schedulersDetails.payload || payloadList"></app-flow-chart>
+            </ion-col>
+          </ion-row>
+        </ng-template>
+        <ng-template #occurance>
+          <ion-row class="occureing-details">
+            <ion-col size="12" class="ion-no-padding">
+              <ion-row>
+                <ion-col size="12" class="ion-no-padding">
+                  <ion-label class="ion-title-content">Occurrence</ion-label>
+                </ion-col>
+                <ion-col size="12" class="ion-no-padding defind">
+                  <ion-label>You can define an one-time or recurrent schedule</ion-label>
+                </ion-col>
+                <ion-col size="12" class="toggle">
+                  <div>
+                    <ion-note>One-time schedule </ion-note>
+                    <ion-toggle [checked]="schedulersDetails.occurrence == 'RECURRING_SCHEDULE'" mode="ios"
+                      (ionChange)="toggleChanged()"></ion-toggle>
+                    <ion-note>Recurring schedule</ion-note>
+                  </div>
+                </ion-col>
+              </ion-row>
+              <ion-row *ngIf="schedulersDetails?.occurrence =='ONE_TIME_SCHEDULE'">
+                <ion-col size="6" class="ion-no-padding select P-E-12">
+                  <ion-label>Time zone</ion-label>
+                  <ion-item fill="outline" lines="none">
+                    <ion-select [(ngModel)]="schedulersDetails.timeZone" label="" labelPlacement="stacked"
+                      class="ion-no-padding " [interfaceOptions]="commonService.customPopoverOptions"
+                      placeholder="(UTC+05:30) IST" name="CDP Name" interface="popover">
+                      <ion-select-option value='EST'>(UTC-05:00) EST</ion-select-option>
+                      <ion-select-option value='UTC'>(UTC-05:00) UTC</ion-select-option>
+                      <ion-select-option value='IST'>(UTC+05:30) IST</ion-select-option>
+                      <ion-select-option value='PST'>(UTC-08:00) PST</ion-select-option>
+                      <ion-select-option value='MST'>(UTC-07:00) MST</ion-select-option>
+                      <ion-select-option value='AST'>(UTC-09:00) AST</ion-select-option>
+                      <ion-select-option value='CST'>(UTC-06:00) CST</ion-select-option>
+                    </ion-select>
+                  </ion-item>
+                </ion-col>
+                <ion-col size="6" class="ion-no-padding textbox P-S-12">
+                  <ion-label>Date and time</ion-label>
+                  <ion-item lines="none" fill="outline">
+                    <mat-form-field>
+                      <input [(ngModel)]="schedulersDetails.scheduledAt" style="border:none;" matInput
+                        [ngxMatDatetimePicker]="picker" placeholder="MM/DD/YYYY HH:MM" [disabled]="false"
+                        [min]="minDate">
+                      <mat-datepicker-toggle style="color:var(--ion-color-primary-color);" matSuffix
+                        [for]="$any(picker)" (focus)="picker.open()"></mat-datepicker-toggle>
+                      <ngx-mat-datetime-picker #picker [showSpinners]="true" [showSeconds]="false" [stepHour]="1"
+                        [stepMinute]="1" [stepSecond]="1" [touchUi]="false" size="cover" [enableMeridian]="true"
+                        [disableMinute]="false" [hideTime]="false">
+                        <ng-template>
+                          <span>OK</span>
+                        </ng-template>
+                      </ngx-mat-datetime-picker>
+                    </mat-form-field>
+                  </ion-item>
+                </ion-col>
+              </ion-row>
+              <ion-row *ngIf="schedulersDetails?.occurrence =='RECURRING_SCHEDULE'">
+                <ion-col size="12" class="ion-no-padding">
+                  <ion-row>
+                    <ion-col size="12" class="ion-no-padding select P-E-12">
+                      <ion-label>Time zone</ion-label>
+                      <ion-item fill="outline" lines="none">
+                        <ion-select [(ngModel)]="schedulersDetails.timeZone" label="" labelPlacement="stacked"
+                          class="ion-no-padding " [interfaceOptions]="commonService.customPopoverOptions"
+                          placeholder="(UTC+05:30) IST" name="CDP Name" interface="popover">
+                          <ion-select-option value='EST'>(UTC-05:00) EST</ion-select-option>
+                          <ion-select-option value='UTC'>(UTC-05:00) UTC</ion-select-option>
+                          <ion-select-option value='IST'>(UTC+05:30) IST</ion-select-option>
+                          <ion-select-option value='PST'>(UTC-08:00) PST</ion-select-option>
+                          <ion-select-option value='MST'>(UTC-07:00) MST</ion-select-option>
+                          <ion-select-option value='AST'>(UTC-09:00) AST</ion-select-option>
+                          <ion-select-option value='CST'>(UTC-06:00) CST</ion-select-option>
+                        </ion-select>
+                      </ion-item>
+                    </ion-col>
+                    <ion-col size="12" class="ion-no-padding defind">
+                      <ion-label>You can define an one-time or recurrent schedule</ion-label>
+                    </ion-col>
+                    <ion-col size="12" class="toggle part-content">
+                      <div>
+                        <ion-note>Cron-based schedule<span class="note">
+                            (A schedule set using a cron expression that runs at a specific time, such as 8:00 a.m.
+                            PST on
+                            the first Monday of every month)
+                          </span></ion-note>
+                        <ion-toggle mode="ios" [checked]="schedulersDetails.scheduleType == 'RATE-BASED'"
+                          (ionChange)="baseScheduleChanged()"></ion-toggle>
+                        <ion-note>Rate-based schedule<span class="note">(A schedule that runs at a regular rate, such
+                            as
+                            every 10
+                            minutes)</span></ion-note>
+                      </div>
+                    </ion-col>
+                  </ion-row>
+                  <ion-row *ngIf="schedulersDetails.scheduleType =='CRON-BASED'">
+                    <ion-col size="12" class="ion-no-padding" style="padding-bottom: 6px;">
+                      <ion-label class="ion-title-content">Cron expression</ion-label>
+                    </ion-col>
+                    <ion-col size="12" class="ion-no-padding P-B-30"
+                      style="border-bottom: 1px solid var(--ion-border-color);">
+                      <div>
+                        <ion-label class="corn-title">Cron</ion-label>
+                      </div>
+                      <div class="cron-expression-home">
+                        <div *ngFor="let input of cronInputs" class="w-15">
+                          <ion-item fill="outline" lines="none">
+                            <ion-input type="text" autocomplete="off" [(ngModel)]="input.value"></ion-input>
+                          </ion-item>
+                          <ion-note>{{ input.label }}</ion-note>
+                        </div>
+                      </div>
+                    </ion-col>
+                  </ion-row>
+                  <ion-row *ngIf="schedulersDetails.scheduleType =='RATE-BASED'" class="P-B-30"
+                    style="border-bottom: 1px solid var(--ion-border-color);">
+                    <ion-col size="12" class="ion-no-padding" style="padding-bottom: 6px;">
+                      <ion-label class="ion-title-content">Rate Based</ion-label>
+                    </ion-col>
+                    <ion-col size="6" class="ion-no-padding text-box P-E-12">
+                      <ion-label>Value</ion-label>
+                      <ion-item fill="outline" lines="none">
+                        <ion-input [(ngModel)]='schedulersDetails.rateBaseValue' type="text" placeholder="Value"
+                          autocomplete="off"></ion-input>
+                      </ion-item>
+                    </ion-col>
+                    <ion-col size="6" class="ion-no-padding select P-S-12">
+                      <ion-label>Unit</ion-label>
+                      <ion-item fill="outline" lines="none">
+                        <ion-select [(ngModel)]='schedulersDetails.rateBaseUnit' label="" labelPlacement="stacked"
+                          class="ion-no-padding " [interfaceOptions]="commonService.customPopoverOptions"
+                          placeholder="Unit" name="CDP Name" interface="popover">
+                          <ion-select-option [value]='"minutes"'>Minutes</ion-select-option>
+                          <ion-select-option [value]='"hours"'>Hours</ion-select-option>
+                          <ion-select-option [value]='"days"'>Days</ion-select-option>
+                        </ion-select>
+                      </ion-item>
+                    </ion-col>
+                  </ion-row>
+                </ion-col>
+                <ion-col size="12" class="ion-no-padding P-T-30 P-B-30">
+                  <ion-label class="ion-title-content">Timeframe</ion-label>
+                </ion-col>
+                <ion-col size="3" class="ion-no-padding textbox P-E-12">
+                  <ion-label>Start date and time</ion-label>
+                  <ion-item lines="none" fill="outline">
+                    <mat-form-field>
+                      <input [(ngModel)]="schedulersDetails.startDate" style="border:none;" matInput [min]="minDate"
+                        [ngxMatDatetimePicker]="startpicker" placeholder="MM/DD/YYYY HH:MM" [disabled]="false">
+                      <mat-datepicker-toggle style="color:var(--ion-color-primary-color);" matSuffix
+                        [for]="$any(startpicker)" (focus)="startpicker.open()"></mat-datepicker-toggle>
+                      <ngx-mat-datetime-picker #startpicker [showSpinners]="true" [showSeconds]="false" [stepHour]="1"
+                        [stepMinute]="1" [stepSecond]="1" [touchUi]="false" size="cover" [enableMeridian]="true"
+                        [disableMinute]="false" [hideTime]="false">
+                        <ng-template>
+                          <span>OK</span>
+                        </ng-template>
+                      </ngx-mat-datetime-picker>
+                    </mat-form-field>
+                  </ion-item>
+                </ion-col>
+                <ion-col size="3" class="ion-no-padding textbox P-S-12">
+                  <ion-label>End date and time</ion-label>
+                  <ion-item lines="none" fill="outline">
+                    <mat-form-field>
+                      <input [(ngModel)]="schedulersDetails.endDate" style="border:none;" matInput [min]="minDate"
+                        [ngxMatDatetimePicker]="Endpicker" placeholder="MM/DD/YYYY HH:MM" [disabled]="false">
+                      <mat-datepicker-toggle style="color:var(--ion-color-primary-color);" matSuffix
+                        [for]="$any(Endpicker)" (focus)="Endpicker.open()"></mat-datepicker-toggle>
+                      <ngx-mat-datetime-picker #Endpicker [showSpinners]="true" [showSeconds]="false" [stepHour]="1"
+                        [stepMinute]="1" [stepSecond]="1" [touchUi]="false" size="cover" [enableMeridian]="true"
+                        [disableMinute]="false" [hideTime]="false">
+                        <ng-template>
+                          <span>OK</span>
+                        </ng-template>
+                      </ngx-mat-datetime-picker>
+                    </mat-form-field>
+                  </ion-item>
+                </ion-col>
+              </ion-row>
+            </ion-col>
+          </ion-row>
+        </ng-template>
+      </ion-col>
+    </ion-row>
+  </ion-content>
+  <ion-footer class="schedular-create-model-footer ion-no-border">
+    <ion-toolbar>
+      <ion-row>
+        <ion-col size="6" *ngIf="!schedulerPage">
+          <div class="btns-wrapper" style="justify-content: start;">
+            <button class="ion-no-margin step2-back-btn" fill="clear" (click)="exitSchedularInSourcePage()">
+              <ion-label color="primary-color">Cancel</ion-label>
+            </button>
+          </div>
+        </ion-col>
+        <ion-col size="6" *ngIf="schedulerPage">
+          <div class="btns-wrapper" style="justify-content: start;">
+            <button class="ion-no-margin step2-back-btn" fill="clear" (click)="exitSchedular()">
+              <ion-label color="primary-color">Cancel</ion-label>
+            </button>
+          </div>
+        </ion-col>
+        <ion-col size="6">
+          <div class="btns-wrapper">
+            <button *ngIf="progressBar.currentActive != 1" class="ion-no-margin step2-back-btn" fill="clear"
+              (click)="previousScheduler()">
+              <ion-icon name="chevron-back-outline"></ion-icon>
+              <ion-label color="primary-color">Back</ion-label>
+            </button>
+            <button class="ion-no-margin step2-next-btn" (click)="nextScheduler()">
+              <ion-label>{{ schedularProgressBar.length ==
+                progressBar.currentActive ? 'Save':
+                'Next'}}</ion-label><ion-icon name="chevron-forward-outline"></ion-icon>
+            </button>
+          </div>
+        </ion-col>
+      </ion-row>
+
+    </ion-toolbar>
+  </ion-footer>
+</ng-template>
+
+<ion-modal class="adding-scheduler" [isOpen]="openModelName=='SCHEDULER'" backdropDismiss="false">
+  <ng-template>
+    <ng-template [ngTemplateOutlet]="schedularComponentCreate"></ng-template>
+  </ng-template>
+</ion-modal>
+
+<ion-modal [isOpen]="isAuditConfigModal" [backdropDismiss]="false" class="audit-config-modal-container">
+  <ng-template>
+    <ion-content>
+      <div class="header">
+        <h2>Audit Field Config</h2>
+      </div>
+      <div *ngIf="!this.auditFieldConfig.errorMessage" class="content">
+        <div>
+          <div class="label-container">
+            <p>Source Object Name</p>
+          </div>
+          <ion-item fill="outline" lines="none">
+            <ion-input [readonly]="true" placeholder="Source name" name="sourceName"
+              [(ngModel)]="auditFieldConfig.sourceName"></ion-input>
+          </ion-item>
+        </div>
+        <div>
+          <div class="label-container">
+            <p>Audit Field</p>
+          </div>
+          <ion-item fill="outline" lines="none">
+            <ion-select label="" labelPlacement="stacked" class="ion-no-padding"
+              [(ngModel)]="auditFieldConfig.updatedAtAttribute" [interfaceOptions]="commonService.customPopoverOptions"
+              placeholder="-Select-" name="Source System Name" interface="popover">
+              <ion-select-option *ngFor="let list of auditFieldConfig.dateAttributeList"
+                [value]="list.name">{{list.name}}</ion-select-option>
+            </ion-select>
+          </ion-item>
+        </div>
+      </div>
+      <div *ngIf="this.auditFieldConfig.errorMessage" class="errorContent">
+        <p style="font-size: 16px; padding: 0px 60px; line-height: 30px;">Error message:
+          {{this.auditFieldConfig.errorMessage}}</p>
+      </div>
+    </ion-content>
+    <ion-footer class="ion-no-border" *ngIf="!this.auditFieldConfig.errorMessage">
+      <ion-buttons slot="end" class="ion-no-margin">
+        <ion-button (click)="cancelEditAuditAttribute(auditFieldConfig.sourceName)" class="cancel-btn">
+          <ion-label color="primary-text">Cancel</ion-label>
+        </ion-button>
+        <ion-button (click)="saveAuditAttribute()" fill="solid" color="primary-color" class="ion-no-margin cnfrm-btn">
+          <ion-label color="white-text">Save</ion-label>
+        </ion-button>
+      </ion-buttons>
+    </ion-footer>
+  </ng-template>
+</ion-modal>
+
+
+<ion-modal class="warning-modal" [isOpen]="openModelName=='ERROR'" backdropDismiss="false">
+  <ng-template>
+    <ion-header>
+      <ion-row>
+        <ion-col size="6">
+          <ion-label class="ion-title-content">ERROR</ion-label>
+        </ion-col>
+      </ion-row>
+    </ion-header>
+    <ion-content>
+      <ion-row>
+        <ion-col size="12">
+          <ion-label class="ion-title-content">At least one source object must be mapped to create the
+            scheduler</ion-label>
+        </ion-col>
+      </ion-row>
+    </ion-content>
+    <ion-footer>
+      <ion-row>
+        <ion-col size="12">
+          <ion-button (click)="closeModel()" color="primary-color" class="ion-no-margin cnfrm-btn">
+            <ion-label>Ok</ion-label>
+          </ion-button>
+        </ion-col>
+      </ion-row>
+    </ion-footer>
+  </ng-template>
+</ion-modal>
+
+
+<ion-modal class="csv-style" [isOpen]="openModelName=='CSV-MODAL'">
+  <ng-template>
+    <ion-row>
+      <ion-col size="12" class="header">
+        <ion-label>CSV File Upload</ion-label>
+      </ion-col>
+      <ion-col size="12" class="name-content">
+        <ion-label>Object Name</ion-label>
+        <ion-item fill="outline" lines="none">
+          <ion-input [(ngModel)]='csvUpload.objectName' type="text" autocomplete="off"></ion-input>
+        </ion-item>
+      </ion-col>
+      <ion-col size="12" class="upload-button">
+        <input type="file" (change)="csvFileReader($event)" style="display: none;" #fileInputCsv accept=".csv,.tsv" />
+        <ion-button *ngIf="!csvUpload.fileName" class="ion-no-margin submit-btn" (click)="fileInputCsv.click()">
+          <ion-img src="../../../assets/upload.svg"></ion-img>
+          <ion-label style="text-transform: none;">Upload CSV</ion-label>
+        </ion-button>
+        <ion-label style="display: flex;
+        align-items: center;" *ngIf="csvUpload.fileName">{{csvUpload.fileName}} <ion-icon class="delete-icon"
+            slot="icon-only" name="trash" (click)="clearFileSelection()"></ion-icon></ion-label>
+      </ion-col>
+      <ion-col size="6" class="submit-btn-start">
+        <ion-button class="ion-no-margin cancel-btn" (click)="modelCancel()">
+          <ion-label style="text-transform: none;">Cancel</ion-label>
+        </ion-button>
+      </ion-col>
+      <ion-col size="6" class="submit">
+        <ion-button class="ion-no-margin submit-btn" (click)="uploadCsv('UPLOAD')">
+          <ion-label style="text-transform: none;">Submit</ion-label>
+        </ion-button>
+      </ion-col>
+    </ion-row>
+  </ng-template>
+</ion-modal>

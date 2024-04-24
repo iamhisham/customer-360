@@ -1,0 +1,79 @@
+@import '../../../../../theme/variables.scss';
+
+* {
+  font-family: "roboto-regular";
+  font-style: normal;
+}
+
+//uploading image or attachment section
+.attachment-label {
+  color: var(--ion-content-txt);
+  // font-family: "Inter";
+  font-style: normal;
+  font-weight: 400;
+  font-size: 14px;
+  margin: 0px;
+}
+
+.upload-textarea {
+  border: 0.5px solid #d5d5d5;
+  border-radius: 2px;
+
+  ion-item {
+    .uploading-fileLabelName {
+      width: 100px;
+      font-size: 14px;
+    }
+
+    ion-button {
+      border: 0.5px solid #808080;
+      border-radius: 2px;
+
+      ion-label {
+        color: var(--ion-color-primary);
+        font-weight: 500;
+        font-size: 12px;
+      }
+    }
+
+    .delete-btn-icon {
+      color: var(--ion-color-primary) !important;
+      padding-right: 10px;
+    }
+
+    .delete-btn-label {
+      color: var(--ion-color-primary) !important;
+      font-weight: 500;
+      font-size: 12px;
+    }
+  }
+}
+
+ion-segment-button::part(indicator-background) {
+  background: var(--ion-color-primary-color);
+}
+
+.segment-button-checked.md::part(native) {
+  color: var(--ion-color-primary-color);
+}
+
+
+.button-segment {
+  display: flex;
+  justify-content: end;
+
+  ion-segment {
+    width: fit-content;
+    border-radius: 20px;
+    margin-bottom: 8px;
+  }
+}
+
+
+.segment-button-checked.ios::part(native) {
+  color: #fff;
+}
+
+ion-segment-button.ios::part(indicator-background) {
+  border-radius: 20px;
+}

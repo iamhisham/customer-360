@@ -1,0 +1,123 @@
+@import '../../../../../theme/variables.scss';
+
+section {
+  * {
+    font-family: 'Roboto-Regular';
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--heading-text-color);
+  }
+
+  .heading-label-wrap {
+    margin: 28px 0px 24px 0px;
+
+    ion-label {
+      font-family: 'Roboto-Medium';
+      font-size: 16px;
+      font-weight: 500;
+    }
+  }
+
+
+
+  .data-content-wrapper {
+    ion-row {
+      ion-col:nth-child(1) {
+
+        .sub-text-container {
+          display: flex;
+          justify-content: space-between;
+          margin-bottom: 16px;
+
+          .sub-txt-data-wrap {
+            ion-note {
+              font-size: 14px;
+              line-height: 20px;
+            }
+
+            ion-text {
+              font-size: 14px;
+              line-height: 20px;
+              font-family: 'Roboto-Medium';
+            }
+          }
+        }
+      }
+
+      ion-col:nth-child(2) {
+        .bill-card-container {
+          display: flex;
+          padding: 20px;
+          border-radius: 5px;
+          align-items: center;
+          margin-bottom: 12px;
+          justify-content: space-between;
+          border: 0.75px solid var(--border-line);
+
+          .each-bill-wrap {
+            display: flex;
+            flex-direction: column;
+
+            ion-note {
+              font-size: 14px;
+              margin-bottom: 12px;
+            }
+
+            ion-text {
+              font-family: 'Roboto-Medium';
+              font-size: 16px;
+              font-weight: 500;
+            }
+          }
+
+          .pay-btn-wrap {
+            ion-button {
+              --box-shadow: none;
+
+              ion-label {
+                font-size: 14px;
+                font-weight: 500;
+                text-transform: none;
+                color: var(--ion-color-white-text);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .invoice-history-wrapper {
+    // margin-top: 40px;
+  }
+}
+
+
+//common css
+
+//no data found
+.none-data-account {
+  display: flex;
+  justify-content: center;
+
+  .main-none-container {
+    width: 320px;
+    height: 100%;
+    padding: 10px 20px;
+    background: var(--ion-color-tertiary-color);
+    border-radius: 10px;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    display: inline-flex;
+
+    .sub-container-none {
+      color: var(--available-text-color);
+      font-size: 16px;
+      line-height: 39px;
+      letter-spacing: 0.49px;
+      word-wrap: break-word;
+      font-family: 'Roboto-Medium';
+    }
+  }
+}

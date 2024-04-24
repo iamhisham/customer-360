@@ -1,0 +1,172 @@
+<section class="whole-content-wrapper">
+  <ng-container *ngIf="usageAndBalanceDetails">
+    <ion-row *ngFor="let usageAndBalance of usageAndBalanceDetails; let i = index" style="margin-top: 28px;">
+      <ion-col size="12">
+        <ion-label color="tertiary-text">Subscription Number: {{ usageAndBalance.subscriptionNumber }}</ion-label>
+        <div class="first-line">
+          <div>
+            <ion-note color="secondary-text">Phone Number: </ion-note>
+            <ion-text color="tertiary-text">{{(usageAndBalance?.phoneNumber | PhoneNumberPipe) || '-'}}</ion-text>
+            <ion-chip class="active-container">
+              <ion-icon name="ellipse" class="active-icon"
+                *ngIf="usageAndBalance.dataUsageDetails?.status === 'ACTIVE'"></ion-icon>
+              <ion-icon name="ellipse" class="pending-icon"
+                *ngIf="usageAndBalance.dataUsageDetails?.status === 'PENDING'"></ion-icon>
+              <ion-label *ngIf="usageAndBalance.dataUsageDetails?.status"
+                class="card-right-value roboto-regular textCapitalize" color="tertiary-text">
+                {{ usageAndBalance.dataUsageDetails?.status || '-' }}
+              </ion-label>
+            </ion-chip>
+          </div>
+          <div>
+            <ion-note color="secondary-text">Plan: </ion-note>
+            <ion-text color="tertiary-text">{{usageAndBalance.dataUsageDetails?.planName|| '-'}}</ion-text>
+          </div>
+          <div>
+            <ion-note color="secondary-text">Total Quota: </ion-note>
+            <ion-text color="tertiary-text">{{usageAndBalance.dataUsageDetails?.totalData|| '-'}}</ion-text>
+          </div>
+          <div>
+            <ion-note color="secondary-text">Monthly Tariff: </ion-note>
+            <ion-text color="tertiary-text"> <span
+                *ngIf="usageAndBalance?.price?.currencyIsoCode + usageAndBalance?.price?.amount">{{(usageAndBalance?.price?.currencyIsoCode | CurrencyPipe)}}</span>
+              {{(usageAndBalance?.price?.amount | CurrencyPipe) || '-'}}</ion-text>
+          </div>
+          <!-- <div>
+            <ion-note color="secondary-text">Current Status: </ion-note>
+            <ion-text color="tertiary-text">{{(usageAndBalance.dataUsageDetails?.status | titlecase) || '-'}}</ion-text>
+          </div> -->
+        </div>
+
+        <div class="box-shadow">
+          <ion-grid class="ion-no-padding">
+            <ion-row>
+              <!-- left side -->
+              <ion-col size="2.5">
+                <div *ngIf="usageAndBalance.chart">
+                  <div *ngIf="usageAndBalance.status === 'ACTIVE'">
+                    <apx-chart #usageAndBalanceChartRef [series]="usageAndBalance.chart?.series"
+                      [chart]="usageAndBalance.chart?.chart" [plotOptions]="usageAndBalance.chart?.plotOptions"
+                      [colors]="usageAndBalance.chart?.colors" [labels]="usageAndBalance.chart?.labels"></apx-chart>
+                  </div>
+                  <div class="no-chart-data-to-render" *ngIf="usageAndBalance.status === 'PENDING'">
+                    <ion-card class="ion-no-margin">
+                      <ion-text>No Chart Data</ion-text>
+                    </ion-card>
+                  </div>
+                </div>
+                <div *ngIf="!usageAndBalance.chart">
+                  <div class="loader ion-margin-top">
+                    <ion-spinner></ion-spinner>
+                  </div>
+                </div>
+              </ion-col>
+
+              <!-- right side -->
+              <ion-col class="second-line-right-container">
+                <div class="flex-item">
+                  <div>
+                    <ion-note class="ion-padding-bottom" color="tertiary-text">Data Used</ion-note>
+                    <ion-text color="primary-color">{{usageAndBalance.dataUsageDetails?.dataUsed || '-'}}</ion-text>
+                  </div>
+                  <div>
+                    <ion-note class="ion-padding-bottom" color="tertiary-text">Data Left</ion-note>
+                    <ion-text color="primary-color">{{(usageAndBalance.dataUsageDetails?.dataLeft) || '-' }}</ion-text>
+                  </div>
+                  <div>
+                    <ion-note class="ion-padding-bottom" color="tertiary-text">Data Speed</ion-note>
+                    <ion-text color="primary-color">{{usageAndBalance.dataUsageDetails?.dataBandwidthPerSec ||
+                      '-'}}</ion-text>
+                  </div>
+                  <div>
+                    <ion-note class="ion-padding-bottom" color="tertiary-text">Days Left</ion-note>
+                    <ion-text color="primary-color">{{usageAndBalance.dataUsageDetails?.daysLeft || '-'}}
+                      <span *ngIf="usageAndBalance.status === 'ACTIVE'">Days</span></ion-text>
+                  </div>
+                </div>
+              </ion-col>
+            </ion-row>
+          </ion-grid>
+        </div>
+
+        <!-- chart one -->
+        <div class="graph-container" *ngIf="usageAndBalance?.viewMoreLessFlag">
+          <ion-row>
+            <ion-col>
+              <div class="graph-title-wrap">
+                <ion-text class="graph-title" color="tertiary-text">Data Usage Analytics</ion-text>
+              </div>
+            </ion-col>
+            <ion-col>
+              <div class="ion-float-right tab-container-wrap">
+                <ul class="chart-grid-tab-container" (click)="graphGridView(usageAndBalance?.graphGridFlag, i)">
+                  <li class="cursor-pointer" (click)="selectedView = 'CHART'"
+                    [ngClass]="{'active': selectedView === 'CHART'}">
+                    <ion-icon name="stats-chart-outline"></ion-icon>
+                  </li>
+                  <li class="cursor-pointer" (click)="selectedView = 'GRID'"
+                    [ngClass]="{'active': selectedView === 'GRID'}">
+                    <ion-icon name="grid-outline"></ion-icon>
+                  </li>
+                </ul>
+
+                <ul class="day-month-tab-container">
+                  <li *ngFor="let Tab of ['Daily', 'Monthly']" [ngClass]="{'active' : selectedList===Tab}"
+                    (click)="showComponent(Tab, usageAndBalance)" class="cursor-pointer">
+                    {{Tab}}
+                  </li>
+                </ul>
+              </div>
+            </ion-col>
+          </ion-row>
+
+          <div *ngIf="selectedList==='Daily' || selectedList==='Monthly'" class="charts-wrap-container">
+            <div *ngIf="!usageAndBalance.graphGridFlag">
+              <apx-chart #montlyChartRef *ngIf="barMonthly" [series]="barMonthly?.series" [chart]="barMonthly?.chart"
+                [dataLabels]="barMonthly?.dataLabels" [plotOptions]="barMonthly?.plotOptions"
+                [yaxis]="barMonthly?.yaxis" [legend]="barMonthly?.legend" [fill]="barMonthly?.fill"
+                [stroke]="barMonthly?.stroke" [tooltip]="barMonthly?.tooltip" [xaxis]="barMonthly?.xaxis"
+                [colors]="barMonthly?.colors"></apx-chart>
+            </div>
+            <div *ngIf="usageAndBalance.graphGridFlag" class="ion-margin-bottom">
+              <app-table #usageBalance_grid [tableDetails]="usageAndBalanceTable"></app-table>
+            </div>
+            <div class="click-tableview-btn">
+              <!-- <ion-button>
+                <ion-label *ngIf="!usageAndBalance.graphGridFlag">Click to see Grid view</ion-label>
+                <ion-label *ngIf="usageAndBalance.graphGridFlag">Click to see Graph view</ion-label>
+              </ion-button> -->
+            </div>
+          </div>
+        </div>
+
+        <!-- buttons view more / less -->
+        <div class="buy-data-btn" *ngIf="usageAndBalance.status === 'ACTIVE'">
+          <ion-button class="ion-no-margin">
+            <!-- <ion-img class="repeat-icon" src="../../../assets/icons/repeat.svg"></ion-img> -->
+            <ion-label color="white-text">Manage</ion-label>
+          </ion-button>
+          <ion-button class="ion-no-margin" (click)="viewMoreLess(usageAndBalance, i)">
+            <ion-img class="expand-icon" src="../../../assets/icons/maximize.svg"></ion-img>
+            <ion-label *ngIf="!usageAndBalance?.viewMoreLessFlag" color="primary-color"
+              (click)="showComponent('Monthly', usageAndBalance)">View More</ion-label>
+            <ion-label *ngIf="usageAndBalance?.viewMoreLessFlag" color="primary-color">View Less</ion-label>
+          </ion-button>
+        </div>
+      </ion-col>
+    </ion-row>
+    <ion-row class="main-no-data-found" *ngIf="usageAndBalanceDetails?.length === 0">
+      <ion-col>
+        <ion-label color="tertiary-text">Subscription Number</ion-label>
+        <div>
+          <ion-label>No Data Found</ion-label>
+        </div>
+      </ion-col>
+    </ion-row>
+  </ng-container>
+  <ng-container *ngIf="!usageAndBalanceDetails">
+    <div class="loader ion-margin-top">
+      <ion-spinner></ion-spinner>
+    </div>
+  </ng-container>
+</section>

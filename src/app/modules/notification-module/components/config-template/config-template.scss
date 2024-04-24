@@ -1,0 +1,22 @@
+@import "../../../../../theme/variables.scss";
+
+.wrappper {
+  padding: 40px;
+}
+
+ion-col,
+ion-grid {
+  padding: 0;
+}
+
+.heading {
+  font-size: 20px;
+  font-family: "Roboto-Medium";
+  font-weight: 500;
+  word-wrap: break-word;
+}
+
+.create-button {
+  margin: 0;
+  --background: var(--ion-color-primary-color)
+}

@@ -1,0 +1,105 @@
+<ion-content>
+  <ion-grid class="ion-no-padding">
+    <ion-row class="whole-container">
+      <ion-col size="12" class="ion-no-padding table-header">
+        <ion-breadcrumbs mode="ios">
+          <!-- <ion-breadcrumb routerLink="/source-system">External Source System</ion-breadcrumb> -->
+          <ion-breadcrumb routerLink="/data-setup/source-system">Source System</ion-breadcrumb>
+          <ion-breadcrumb routerLink="/data-setup/source-system/imported-history" href="#electronics">Import
+            History</ion-breadcrumb>
+        </ion-breadcrumbs>
+      </ion-col>
+      <ion-col size="12" class="M-24">
+        <app-table #importhistory_table [tableDetails]="importHistoryTableDetails"></app-table>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>
+
+<ion-modal style="--height: 200px; --width: 450px; --border-radius: 4px;" [isOpen]="importData.isErrorModal"
+  (willDismiss)="closeAllModel()">
+  <ng-template>
+    <ion-content>
+      <ion-grid class="ion-no-padding" style="height: 100%;">
+        <ion-row class="ion-no-padding" style="height: 100%;">
+          <ion-col size="12"
+            style="position: relative; display: flex; height: calc(100%); display:flex; justify-content: center; align-items: center;">
+            <div
+              style="display: flex; height: 50px; justify-content: space-between; align-items: center; padding: 0px 10px; position: absolute; top: 0px; left: 0px; width: 100%; border-bottom: 1px solid var(--border-line);">
+              <h3 style="color: var(--ion-color-tertiary-text)">Error message</h3>
+              <ion-icon (click)="closeAllModel()" style="font-size: 22px; cursor: pointer;"
+                name="close-outline"></ion-icon>
+            </div>
+            <div style="display: flex; flex-direction: column;">
+              <div style="display: flex;">
+                <div style="width: 100px; text-align: start;">
+                  <p
+                    style="margin-top: 28px; font-size: 16px; font-family: 'Roboto-Medium'; color: var(--ion-color-tertiary-text);">
+                    Message : </p>
+                </div>
+                <div style="width: 280px">
+                  <p style="margin-top: 28px; font-size: 16px;">{{importData.errorMessage}}</p>
+                </div>
+              </div>
+              <div style="display: flex;" *ngIf="importData?.errorCode">
+                <div style="width: 100px; text-align: start;">
+                  <p
+                    style="margin-top: 16px; font-size: 16px; font-family: 'Roboto-Medium'; color: var(--ion-color-tertiary-text);">
+                    Error Code : </p>
+                </div>
+                <div style="width: 280px;">
+                  <p style="margin-top: 16px; font-size: 16px;">{{importData?.errorCode || 'No Error Code'}}</p>
+                </div>
+              </div>
+            </div>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </ion-content>
+  </ng-template>
+</ion-modal>
+
+<ion-modal style="--height: 617px; --width: 735px; border-radius: 5px; --border-radius: 5px;"
+  [isOpen]="importData.isResultModal" (willDismiss)="closeAllModel()">
+  <ng-template>
+    <ion-content class="ion-padding">
+      <ion-grid class="ion-padding">
+        <ion-row class="ion-no-padding content-wrapper">
+          <ion-col size="12" class="M-b-10">
+            <div class="title-container">
+              <h1>View Results</h1>
+              <ion-icon (click)="closeAllModel()" name="close-outline"></ion-icon>
+            </div>
+          </ion-col>
+          <ion-col size="6">
+            <p class="para">Source System : {{viewResults.moduleName}}</p>
+          </ion-col>
+          <ion-col size="6">
+            <p class="para">Start At : {{datePipe.transform(viewResults.startAt, this.commonService.date_time_format)}}
+            </p>
+          </ion-col>
+          <ion-col size="6">
+            <p class="para">Module Name : {{viewResults.moduleName}}</p>
+          </ion-col>
+          <ion-col size="6">
+            <p class="para">End At : {{datePipe.transform(viewResults.endAt, this.commonService.date_time_format)}}</p>
+          </ion-col>
+          <ion-col size="6">
+            <p class="para">Import Format : {{viewResults.type}}</p>
+          </ion-col>
+          <ion-col size="6">
+            <p class="para">Duration : {{ this.durationPipe.transform(viewResults.duration) }}</p>
+          </ion-col>
+          <ion-col size="12" class="M-t-12">
+            <app-table [tableDetails]="viewResultsTableDetails"></app-table>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </ion-content>
+    <!-- <ion-footer>
+      <ion-toolbar>
+        <ion-button class="ion-float-right" style="padding-right: 10px;">Close</ion-button>
+      </ion-toolbar>
+    </ion-footer> -->
+  </ng-template>
+</ion-modal>

@@ -1,0 +1,190 @@
+<ion-content>
+  <ion-grid class="ion-no-padding">
+    <ion-row class="whole-container">
+      <ion-col size="12" class="ion-no-padding table-header">
+        <ion-breadcrumbs mode=ios>
+          <ion-breadcrumb routerLink="/data-setup/audit-log">Audit log</ion-breadcrumb>
+          <ion-breadcrumb>View Details</ion-breadcrumb>
+        </ion-breadcrumbs>
+      </ion-col>
+      <ion-col size="12" class="M-24">
+        <app-table #extenstion_table [tableDetails]="extenstionTableDetails"></app-table>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>
+
+<ion-modal class="view-changes" [isOpen]="isModal == 'HISTORY'" [backdropDismiss]="false">
+  <ng-template>
+    <ion-header style="box-shadow: none;">
+      <ion-row class="header-container">
+        <ion-col size="6" class="title">
+          <ion-label>View Change History</ion-label>
+        </ion-col>
+        <ion-col size="6" class="close-icon">
+          <ion-icon name="close-outline" (click)="isModal = 'NONE';expandedItems=[]"></ion-icon>
+        </ion-col>
+      </ion-row>
+    </ion-header>
+    <ion-content style="overflow: auto;">
+      <ion-row class="expand-collapse-buttons">
+        <ion-col offset="6" size="6">
+          <ion-label (click)="expandAll()" *ngIf="!isAnyExpanded()">Expand All</ion-label>
+          <ion-label (click)="collapseAll()" *ngIf="isAnyExpanded()">Collapse All</ion-label>
+        </ion-col>
+      </ion-row>
+      <ion-grid *ngFor="let change of changeData" style="padding-top: 20px;">
+        <ion-item class="menu-item" lines="none" (click)="toggleModuleVisibility(change)">
+          <ion-label>Source System : {{change.sourceSystem}}</ion-label>
+          <ion-label style="text-align: center;">Event Type : {{change.eventType}}</ion-label>
+          <ion-label style="text-align: end;
+            padding-inline-end: 8px;">{{this.datePipe.transform(change.eventDate,
+            this.commonService.date_time_format)}}​</ion-label>
+          <ion-icon *ngIf="!isExpanded(change)" name='chevron-down-outline'></ion-icon>
+          <ion-icon *ngIf="isExpanded(change)" name='chevron-up-outline'></ion-icon>
+        </ion-item>
+        <ion-row *ngIf="isExpanded(change)">
+          <ion-col size="12" class="table-view">
+            <ion-grid style="padding: 0;">
+              <table class="table">
+                <thead>
+                  <tr class="header">
+                    <th>Attribute</th>
+                    <th *ngIf="change?.eventType == 'UPDATE'">Previous Value</th>
+                    <th>New Value</th>
+                  </tr>
+                </thead>
+                <tbody *ngIf="change.changeHistory && change.changeHistory.length > 0">
+                  <ng-container *ngFor="let tableColum of change.changeHistory; let i = index">
+                    <tr class="table-row" [class.cell]=" i % 2===0">
+                      <td>{{ tableColum.attr }}</td>
+                      <td *ngIf="change.eventType == 'UPDATE'">{{ tableColum.prev }}</td>
+                      <td>{{ tableColum.current }}</td>
+                    </tr>
+                  </ng-container>
+                </tbody>
+                <tbody *ngIf="!change.changeHistory || change.changeHistory.length === 0" style="height: 120px;
+                  border: 1px solid #ccc;">
+                  <ng-container>
+                    <tr>
+                      <td colspan="3">
+                        <ion-row>
+                          <ion-col size="12" class="none-data-account">
+                            <div class="main-none-container">
+                              <div class="sub-container-none">
+                                No Attributes Changes</div>
+                            </div>
+                          </ion-col>
+                        </ion-row>
+                      </td>
+                    </tr>
+                  </ng-container>
+                </tbody>
+              </table>
+            </ion-grid>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </ion-content>
+  </ng-template>
+</ion-modal>
+
+
+
+<ion-modal class="view-changes" [isOpen]="isModal == 'VIEW'" [backdropDismiss]="false">
+  <ng-template>
+    <ion-grid style="padding:0px">
+      <ion-row class="header-container view">
+        <ion-col size="6" class="title">
+          <ion-label>View Change History</ion-label>
+        </ion-col>
+        <ion-col size="6" class="close-icon">
+          <ion-icon name="close-outline" (click)="isModal = 'NONE'"></ion-icon>
+        </ion-col>
+      </ion-row>
+      <ion-row style="padding: 0 32px;">
+        <ion-col size="6" class="text-label">
+          <ion-label>Source System:<span> {{viewChanges.sourceSystem}}</span></ion-label>
+        </ion-col>
+        <ion-col size="6" class="text-label">
+          <ion-label>Cdp Object Name:<span> {{viewChanges.cdpObjectName}}</span>​</ion-label>
+        </ion-col>
+        <ion-col size="6" class="text-label">
+          <ion-label>Module Name:<span> {{viewChanges.moduleName}}</span>​</ion-label>
+        </ion-col>
+        <ion-col size="6" class="text-label">
+          <ion-label>Object Id:<span> {{viewChanges.cdpObjectId}}</span></ion-label>
+        </ion-col>
+        <ion-col size="6" class="text-label" style="    margin-bottom: 15px;">
+          <ion-label>Event Type:<span> {{viewChanges.eventType}}</span></ion-label>
+        </ion-col>
+        <ion-col size="6" class="text-label" style="    margin-bottom: 15px;">
+          <ion-label>Event Date:<span> {{this.datePipe.transform(viewChanges.eventDate,
+              this.commonService.date_time_format)}}</span></ion-label>
+        </ion-col>
+      </ion-row>
+      <ion-row style="padding: 0 32px;">
+        <ion-col size="12" class="table-view">
+          <ion-grid style="padding: 0;overflow: auto;
+          height: calc(100vh - 250px);">
+            <table class="table">
+              <thead>
+                <tr class="header">
+                  <th>Attribute</th>
+                  <th *ngIf="viewChanges.eventType == 'UPDATE'">Previous Value</th>
+                  <th>New Value</th>
+                </tr>
+              </thead>
+              <tbody>
+                <ng-container *ngFor="let change of viewChanges.changeHistory; let i = index">
+                  <tr class="table-row" [class.cell]=" i % 2===0">
+                    <td>{{ change.attr || '-' }}</td>
+                    <td *ngIf="viewChanges.eventType == 'UPDATE'">{{ change.prev || '-' }}</td>
+                    <td>{{ change.current || '-' }}</td>
+                  </tr>
+                </ng-container>
+                <ng-container style="height: 120px; border: 1px solid #ccc;"
+                  *ngIf="!viewChanges.changeHistory || viewChanges.changeHistory.length === 0">
+                  <tr>
+                    <td colspan="3">
+                      <ion-row>
+                        <ion-col size="12" class="none-data-account">
+                          <div class="main-none-container">
+                            <div class="sub-container-none">
+                              No Attributes Changes</div>
+                          </div>
+                        </ion-col>
+                      </ion-row>
+                    </td>
+                  </tr>
+                </ng-container>
+              </tbody>
+            </table>
+          </ion-grid>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </ng-template>
+</ion-modal>
+
+<ion-modal style="--height: calc(100vh - 260px);
+--width: calc(100% - 600px); border-radius: 5px; --border-radius: 5px;" [isOpen]="isModal == 'PAYLOAD'"
+  (willDismiss)="closeAllModel()">
+  <ng-template>
+    <ion-header style="padding: 20px;
+    box-shadow: none;
+    border-bottom: 1px solid #ccc;">
+      <ion-row>
+        <ion-col size="6" class="title">
+          <ion-label>JSON Payload</ion-label>
+        </ion-col>
+        <ion-col size="6" class="close-icon" style="display: flex;justify-content: flex-end;">
+          <ion-icon style="zoom: 1.7;cursor: pointer;" name="close-outline" (click)="isModal = 'NONE'"></ion-icon>
+        </ion-col>
+      </ion-row>
+    </ion-header>
+    <ion-content>
+      <pre style="padding:0 0 0 20px">{{ viewResults?.payload | json }}</pre>
+    </ion-content>
+  </ng-template>
+</ion-modal>

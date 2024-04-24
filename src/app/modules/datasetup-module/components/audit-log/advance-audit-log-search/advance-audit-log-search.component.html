@@ -1,0 +1,426 @@
+<ion-content style="--overflow: hidden">
+  <ion-grid  style="padding: 40px; overflow: auto; height: calc(100vh - 82px); " class="customScroller">
+    <ion-row style=" margin-bottom: 20px;">
+      <ion-col size="12" class="ion-no-padding table-header">
+        <ion-breadcrumbs mode=ios>
+          <ion-breadcrumb routerLink="/data-setup/audit-log">Audit log</ion-breadcrumb>
+          <ion-breadcrumb>Advance Audit log Search
+            <ion-icon name="search-outline" (click)="cdpAdvanceAuditLog.isOpen = true;" style="padding-left: 20px; font-size: 20px; cursor: pointer;"></ion-icon>
+          </ion-breadcrumb>
+        </ion-breadcrumbs>
+      </ion-col>
+    </ion-row>
+
+
+    <!-- grid -->
+    <!-- with attribute table -->
+    <ion-row *ngIf="isAdvanceSearchWithAttribute && cdpAdvanceAuditLog?.attribute !== 'All' && cdpAdvanceAuditLog.type !== 'CUSTOMER'">
+      <ion-col size="12" class="table-view">
+        <div class="ion-margin-bottom">
+          <ion-label style="font-family: 'Roboto-Regular'; font-size: 16px;">Results</ion-label>
+        </div>
+        <div>
+          <app-table #advance_grid [tableDetails]="advanceSearchDetails"></app-table>
+        </div>
+      </ion-col>
+    </ion-row>
+
+    <!--without attribute table-->
+    <ion-row *ngIf="isAdvanceSearchWithAttribute && cdpAdvanceAuditLog?.attribute === 'All'&& cdpAdvanceAuditLog.type !== 'CUSTOMER'">
+      <ion-col *ngIf="cdpDataModuleList && cdpDataModuleList.length > 0">
+        <div class="ion-margin-bottom">
+          <ion-label style="font-family: 'Roboto-Regular'; font-size: 16px;">Results</ion-label>
+
+          <ion-toggle style="float: right;" labelPlacement="end" (ionChange)="showZeroAtributes()">Show Zero Attribute</ion-toggle><br /><br />
+        </div>
+        <div>
+          <ion-grid class="ion-no-padding ion-margin-bottom" *ngFor="let item of cdpDataModuleList">
+            <ion-item class="menu-item cursor-pointer" lines="none" (click)="toggleModuleVisibility(item)">
+              <ion-label>Source System : {{item.sourceSystem}}</ion-label>
+              <ion-label style="text-align: center;">
+                Event Type : {{item.eventType}} <span *ngIf="item.eventType === 'UPDATE' && ((item.changeHistory.length > 0 ) || isShowZeroAtributes) ">(
+                  {{item.changeHistory.length}} Attributes )</span>
+              </ion-label>
+              <ion-label style="text-align: end;padding-inline-end: 8px;">{{this.datePipe.transform(item.eventDate,
+                this.commonService.date_time_format)}}​</ion-label>
+              <ion-icon *ngIf="!isExpanded(item)" name='chevron-down-outline'></ion-icon>
+              <ion-icon *ngIf="isExpanded(item)" name='chevron-up-outline'></ion-icon>
+            </ion-item>
+            <ion-row *ngIf="isExpanded(item) && item.changeHistory.length > 0">
+              <ion-col size="12" class="table-view">
+                <ion-grid style="padding: 0;">
+                  <table class="table">
+                    <thead>
+                      <tr class="header">
+                        <th>Attribute</th>
+                        <th>Previous Value</th>
+                        <th>Current Value</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <ng-container *ngFor="let tableColum of item.changeHistory; let i = index">
+                        <tr class="table-row" [class.cell]=" i % 2===0">
+                          <td class="textCapitalize">{{ tableColum.attr || '-' }}</td>
+                          <td class="textCapitalize">{{ tableColum.prev || '-' }}</td>
+                          <td class="textCapitalize">{{ tableColum.current || '-' }}</td>
+                        </tr>
+                      </ng-container>
+                    </tbody>
+                  </table>
+                </ion-grid>
+              </ion-col>
+            </ion-row>
+            <ion-row *ngIf="isExpanded(item) && item.changeHistory.length == 0">
+              <ion-col style="border: 1px solid #ccc;
+                  height: 200px;
+                  display: flex;
+                  justify-content: center;
+                  border-radius: 0px 0px 8px 8px;">
+                <ng-container style="height: 120px; border: 1px solid #ccc;">
+                  <table>
+                    <tr>
+                      <td colspan="3">
+                        <ion-row>
+                          <ion-col size="12" class="none-data-account">
+                            <div class="main-none-container">
+                              <div class="sub-container-none">
+                                No Changes Found!</div>
+                            </div>
+                          </ion-col>
+                        </ion-row>
+                      </td>
+                    </tr>
+                  </table>
+                </ng-container>
+              </ion-col>
+            </ion-row>
+          </ion-grid>
+        </div>
+        <div *ngIf="cdpDataModuleList && cdpDataModuleList.length == 0">
+          <ion-row>
+            <ion-col style="border: 1px solid #ccc;
+                height: 200px;
+                display: flex;
+                justify-content: center;
+                border-radius: 8px;">
+              <ng-container style="height: 120px; border: 1px solid #ccc;">
+                <table>
+                  <tr>
+                    <td colspan="3">
+                      <ion-row>
+                        <ion-col size="12" class="none-data-account">
+                          <div class="main-none-container">
+                            <div class="sub-container-none">
+                              No Attributes Changes</div>
+                          </div>
+                        </ion-col>
+                      </ion-row>
+                    </td>
+                  </tr>
+                </table>
+              </ng-container>
+            </ion-col>
+          </ion-row>
+        </div>
+      </ion-col>
+    </ion-row>
+
+    <ion-row *ngIf="isAdvanceSearchWithAttribute && cdpDataModuleList != null && !cdpAdvanceAuditLog.attribute &&  cdpAdvanceAuditLog.type !== 'CUSTOMER'">
+      <ion-col style="border: 1px solid #ccc;
+            height: 200px;
+            display: flex;
+            justify-content: center;
+            border-radius: 8px;">
+        <ng-container style="height: 120px; border: 1px solid #ccc;">
+          <table>
+            <tr>
+              <td colspan="3">
+                <ion-row>
+                  <ion-col size="12" class="none-data-account">
+                    <div class="main-none-container">
+                      <div class="sub-container-none">
+                        No Attributes Changes</div>
+                    </div>
+                  </ion-col>
+                </ion-row>
+              </td>
+            </tr>
+          </table>
+        </ng-container>
+      </ion-col>
+    </ion-row>
+
+    <!-- WTTH CUSTOMER -->
+    <ion-row *ngIf="isAdvanceSearchWithAttribute && cdpAdvanceAuditLog.type === 'CUSTOMER'">
+      <ion-col *ngIf="cdpDataModuleList && cdpDataModuleList.length > 0">
+        <div class="ion-margin-bottom">
+          <ion-label style="font-family: 'Roboto-Regular'; font-size: 16px;">Results</ion-label>
+          <ion-toggle style="float: right;" labelPlacement="end" (ionChange)="showZeroAtributes()">Show Zero Attribute</ion-toggle><br /><br />
+        </div>
+        <div>
+          <ion-grid class="ion-no-padding ion-margin-bottom" *ngFor="let item of cdpDataModuleList">
+            <ion-item class="menu-item cursor-pointer" lines="none" (click)="toggleModuleVisibility(item)">
+              <ion-label>Source System : {{item.sourceSystem}}</ion-label>
+              <ion-label style="text-align: center;">
+                Event Type : {{item.eventType}} <span *ngIf="item.eventType === 'UPDATE' && ((item.changeHistory.length > 0 ) || isShowZeroAtributes)">(
+                  {{item.changeHistory.length}} Attributes)</span>
+              </ion-label>
+              <ion-label style="text-align: end;padding-inline-end: 8px;">{{this.datePipe.transform(item.eventDate,
+                this.commonService.date_time_format)}}​</ion-label>
+              <ion-icon *ngIf="!isExpanded(item)" name='chevron-down-outline'></ion-icon>
+              <ion-icon *ngIf="isExpanded(item)" name='chevron-up-outline'></ion-icon>
+            </ion-item>
+            <ion-row *ngIf="isExpanded(item) && item.changeHistory.length > 0">
+              <ion-col size="12" class="table-view">
+                <ion-grid style="padding: 0;">
+                  <table class="table">
+                    <thead>
+                      <tr class="header">
+                        <th>Attribute</th>
+                        <th>Previous Value</th>
+                        <th>Current Value</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <ng-container *ngFor="let tableColum of item.changeHistory; let i = index">
+                        <tr class="table-row" [class.cell]=" i % 2===0">
+                          <td class="textCapitalize">{{ tableColum.attr || '-' }}</td>
+                          <td class="textCapitalize">{{ tableColum.prev || '-' }}</td>
+                          <td class="textCapitalize">{{ tableColum.current || '-' }}</td>
+                        </tr>
+                      </ng-container>
+                    </tbody>
+                  </table>
+                </ion-grid>
+              </ion-col>
+            </ion-row>
+            <ion-row *ngIf="isExpanded(item) && item.changeHistory.length == 0">
+              <ion-col style="border: 1px solid #ccc;
+                  height: 200px;
+                  display: flex;
+                  justify-content: center;
+                  border-radius: 0px 0px 8px 8px;">
+                <ng-container style="height: 120px; border: 1px solid #ccc;">
+                  <table>
+                    <tr>
+                      <td colspan="3">
+                        <ion-row>
+                          <ion-col size="12" class="none-data-account">
+                            <div class="main-none-container">
+                              <div class="sub-container-none">
+                                No Changes Found!</div>
+                            </div>
+                          </ion-col>
+                        </ion-row>
+                      </td>
+                    </tr>
+                  </table>
+                </ng-container>
+              </ion-col>
+            </ion-row>
+          </ion-grid>
+        </div>
+        <div *ngIf="cdpDataModuleList && cdpDataModuleList.length == 0">
+          <ion-row>
+            <ion-col style="border: 1px solid #ccc;
+                height: 200px;
+                display: flex;
+                justify-content: center;
+                border-radius: 8px;">
+              <ng-container style="height: 120px; border: 1px solid #ccc;">
+                <table>
+                  <tr>
+                    <td colspan="3">
+                      <ion-row>
+                        <ion-col size="12" class="none-data-account">
+                          <div class="main-none-container">
+                            <div class="sub-container-none">
+                              No Attributes Changes</div>
+                          </div>
+                        </ion-col>
+                      </ion-row>
+                    </td>
+                  </tr>
+                </table>
+              </ng-container>
+            </ion-col>
+          </ion-row>
+        </div>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>
+
+
+<ion-modal [isOpen]="cdpAdvanceAuditLog.isOpen" class="advanceSearchModal"
+  (willDismiss)="cdpAdvanceAuditLog.isOpen = false" style="--border-radius: 16px;" backdropDismiss="true">
+  <ng-template>
+    <ion-header class="headerUpload">
+      <ion-toolbar>
+        <ion-row>
+          <ion-col size="6" style="padding:0">
+            <ion-title class="import-title" style="font-size: 20px; margin-top: 2px;">Advance Search</ion-title>
+          </ion-col>
+          <ion-col size="6" style="padding:0;display: flex; justify-content: flex-end;">
+            <div class="title-container">
+              <ion-icon (click)="cdpAdvanceAuditLog.isOpen = false" style="
+              color: black;
+              cursor: pointer;" name="close-outline"></ion-icon>
+            </div>
+          </ion-col>
+        </ion-row>
+
+      </ion-toolbar>
+    </ion-header>
+    <ion-content class="ion-padding" style="--padding-top: 16px">
+      <ion-row class="form-element">
+        <ion-col size="12" class="import-type-card-container">
+          <ion-label class="import-subtitle ion-item-label">Search By {{cdpAdvanceAuditLog.type == 'CUSTOMER'?
+            'Customer' : 'Object'}}</ion-label>
+          <div style="display: flex;">
+            <div class="import-type-card ion-no-margin" [ngClass]="{'selected': cdpAdvanceAuditLog.type == 'CUSTOMER'}"
+              (click)="switchSearchAdvanceType('CUSTOMER')">
+              <ion-img class="tick-mark" src="../../assets/icons/{{notifiService.themeName}}/tick.svg">
+              </ion-img>
+              <ion-label class="channel-title">Customer</ion-label>
+            </div>
+            <div class="import-type-card ion-no-margin" [ngClass]="{'selected': cdpAdvanceAuditLog.type == 'OBJECT'}"
+              (click)="switchSearchAdvanceType('OBJECT')">
+              <ion-img class="tick-mark" src="../../assets/icons/{{notifiService.themeName}}/tick.svg">
+              </ion-img>
+              <ion-label class="channel-title">Object</ion-label>
+            </div>
+          </div>
+        </ion-col>
+        <!-- CUSTOMER -->
+        <ion-col size="12" *ngIf="cdpAdvanceAuditLog.type == 'CUSTOMER'">
+          <div lines="none">
+            <ion-label class="ion-item-label">Customer Id<span
+                class="error-icon">*</span></ion-label>
+            <ion-input type="number" (ngModelChange)="getCustomerDataById($event)"
+              [(ngModel)]="cdpAdvanceAuditLog.customerID" class="M-T-4" placeholder="Enter Customer Id"
+              style="border: 1px solid gray; border-radius: 5px; height: 36px; --padding-start: 16px; --padding-end: 16px; --highlight-color: none;"></ion-input>
+          </div>
+        </ion-col>
+
+        <ion-col size="12" *ngIf="cdpAdvanceAuditLog.type == 'CUSTOMER'">
+          <ion-label class="ion-item-label">Module Name</ion-label>
+          <ion-item style="--min-height: 30px;" class="padding-top-4px M-T-4" fill="outline" lines="none">
+            <ion-select [disabled]="customerBasedAuditLog.length == 0" label="" labelPlacement="stacked" class="ion-no-padding ion-select" style="min-height: 40px"
+              [interfaceOptions]="commonService.customPopoverOptions" placeholder="-Select-" name="Source System Name"
+              interface="popover" (ionChange)="getCustomerWithModel(cdpAdvanceAuditLog.customerID, cdpAdvanceAuditLog.moduleName)" [(ngModel)]="cdpAdvanceAuditLog.moduleName">
+              <ion-select-option *ngFor="let data of customerBasedAuditLog" [value]="data.attr">
+                {{data.moduleName}}
+              </ion-select-option>
+            </ion-select>
+          </ion-item>
+        </ion-col>
+        <ion-col size="12" *ngIf="cdpAdvanceAuditLog.type == 'CUSTOMER'">
+          <ion-label class="ion-item-label">CDP Object Name</ion-label>
+          <div style="margin-top: 14px" class="mat-select-block">
+            <mat-form-field class="mat-form-container">
+              <mat-select [disabled]="customerBasedAuditLog.length == 0" [multiple]="false"
+                [(ngModel)]="cdpAdvanceAuditLog.cdpObjectName" placeholder="-Select Object Name-" 
+                (ionChange)="getCustomerWithModelAndObject(cdpAdvanceAuditLog.customerID, cdpAdvanceAuditLog.moduleName, $event)">
+                <mat-option>
+                  <ngx-mat-select-search placeholderLabel="Search" [(ngModel)]="filterSearch.cdpObjectName"
+                    [ngModelOptions]="{standalone: true}" noEntriesFoundLabel="No matches found">
+                  </ngx-mat-select-search>
+                </mat-option>
+                <mat-option class="options-container" (onSelectionChange)="selectAttribute(list)"
+                  *ngFor="let list of customerBasedAuditLog | filter: { name : filterSearch.cdpObjectName}" [value]="list.name">
+                  {{list.cdpObjectName}}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </ion-col>
+
+        <!-- OBJECT  -->  
+        <ion-col size="12" *ngIf="cdpAdvanceAuditLog.type !== 'CUSTOMER'">
+          <ion-label class="ion-item-label">Module Name<span class="error-icon">*</span></ion-label>
+          <ion-item style="--min-height: 30px;" class="padding-top-4px M-T-4" fill="outline" lines="none">
+            <ion-select label="" labelPlacement="stacked" class="ion-no-padding ion-select" style="min-height: 40px"
+              [interfaceOptions]="commonService.customPopoverOptions" placeholder="-Select-" name="Source System Name"
+              interface="popover" (ionChange)="moduleList($event)" [(ngModel)]="cdpAdvanceAuditLog.moduleName">
+              <ion-select-option *ngFor="let data of cdpModuleList" [value]="data.attr">
+                {{data.name}}
+              </ion-select-option>
+            </ion-select>
+          </ion-item>
+        </ion-col>
+        <ion-col size="12" *ngIf="cdpAdvanceAuditLog.type !== 'CUSTOMER'">
+          <ion-label class="ion-item-label">CDP Object Name</ion-label>
+          <div style="margin-top: 14px" class="mat-select-block">
+            <mat-form-field class="mat-form-container">
+              <mat-select [disabled]="cdpObjectList.length == 0" [multiple]="false"
+                [(ngModel)]="cdpAdvanceAuditLog.cdpObjectName" (ionChange)="selectAttribute($event)" placeholder="-Select Object Name-">
+                <mat-option>
+                  <ngx-mat-select-search placeholderLabel="Search" [(ngModel)]="filterSearch.cdpObjectName"
+                    [ngModelOptions]="{standalone: true}" noEntriesFoundLabcdpObjectNameel="No matches found">
+                  </ngx-mat-select-search>
+                </mat-option>
+                <mat-option class="options-container" (onSelectionChange)="selectAttribute(list)"
+                  *ngFor="let list of cdpObjectList | filter: { name : filterSearch.cdpObjectName}" [value]="list.name">
+                  {{list.name}}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </ion-col>
+
+        <ion-col *ngIf="cdpAdvanceAuditLog.type != 'CUSTOMER'">
+          <div lines="none">
+            <ion-label class="ion-item-label">Object Id</ion-label>
+            <ion-input type="number" class="M-T-4" placeholder="Enter Object Id"
+              [(ngModel)]="cdpAdvanceAuditLog.objectId" style="border: 1px solid gray;
+              border-radius: 5px; height: 36px;
+              --padding-start: 16px;--highlight-color: none;"></ion-input>
+          </div>
+        </ion-col>
+        <ion-col *ngIf="cdpAdvanceAuditLog.type != 'CUSTOMER'">
+          <ion-label class="ion-item-label">Attribute</ion-label>
+          <!-- <ion-item class="padding-top-4px M-T-4" fill="outline" lines="none">
+                <ion-select label="" labelPlacement="stacked" class="ion-no-padding ion-select" style="min-height: 46px"
+                  [interfaceOptions]="commonService.customPopoverOptions" placeholder="-Select-" name="Source System Name"
+                  interface="popover" [(ngModel)]="cdpAdvanceAuditLog.attribute">
+                  <ion-select-option *ngFor="let attribute of cdpAttributeList">
+                    <ion-label [value]="attribute.name">{{attribute.name}}</ion-label>
+                  </ion-select-option>
+                </ion-select>
+              </ion-item> -->
+          <div style="margin-top: 14px" class="mat-select-block">
+            <mat-form-field class="mat-form-container">
+              <mat-select [multiple]="false" [disabled]="cdpAttributeList.length == 0"
+                [(ngModel)]="cdpAdvanceAuditLog.attribute" placeholder="-Select Object Name-">
+                <mat-option>
+                  <ngx-mat-select-search placeholderLabel="Search" [(ngModel)]="filterSearch.attribute"
+                    [ngModelOptions]="{standalone: true}" noEntriesFoundLabel="No matches found">
+                  </ngx-mat-select-search>
+                </mat-option>
+                <mat-option class="options-container" (click)="isAdvanceSearchWithAttribute = false;"
+                  *ngFor="let attribute of cdpAttributeList | filter: { name : filterSearch.attribute}"
+                  [value]="attribute.name">
+                  {{attribute.name}}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </ion-col>
+      </ion-row>
+    </ion-content>
+
+    <ion-footer class="ion-no-border import-footer">
+      <ion-toolbar>
+        <ion-button (click)="cdpAdvanceAuditLog.isOpen = false" class="ion-no-margin cancel-btn"
+          style="margin-right: 10px;" slot="end" fill="clear">
+          <ion-label style="text-transform: none;">Cancel</ion-label>
+        </ion-button>
+        <ion-button (click)="advanceSearch()" class="ion-no-margin submit-btn" color="primary-color"
+          slot="end">
+          <ion-label style="text-transform: none;">Apply</ion-label>
+        </ion-button>
+      </ion-toolbar>
+    </ion-footer>
+  </ng-template>
+</ion-modal>

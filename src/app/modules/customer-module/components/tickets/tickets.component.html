@@ -1,0 +1,229 @@
+<section class="whole-content-wrapper">
+  <swiper-container #swiper>
+    <swiper-slide>
+      <ion-row [hidden]="selectedTicket?.id !== null">
+        <ion-col class="">
+          <div class="split-tille-n-para">
+            <h1 style="margin-bottom: 24px;" class="common-header">Ticket Statistics</h1>
+          </div>
+          <ion-grid class=" ion-no-margin ion-no-padding">
+            <ion-row>
+              <ion-col size="12" *ngIf="this.ticketSummary?.total > 0">
+                <ion-row class="graph-data">
+                  <ion-col size="3">
+                    <ion-card class="ticket-card">
+                      <div class="label">Affected By Tickets</div>
+                      <div class="chart-first" *ngIf="problemChart">
+                        <apx-chart #problemChartRef [series]="problemChart.series" [chart]="problemChart.chart"
+                          [plotOptions]="problemChart.plotOptions" [labels]="problemChart.labels"
+                          [legend]="problemChart.legend" [colors]="problemChart.colors"></apx-chart>
+                        <ion-label style="display: flex;
+                    justify-content: center;">Problem Ticket - {{problemChart.value}}</ion-label>
+                      </div>
+                      <div *ngIf="!problemChart">
+                        <div class="loader loader-height">
+                          <ion-spinner></ion-spinner>
+                        </div>
+                      </div>
+                    </ion-card>
+                  </ion-col>
+                  <ion-col size="6">
+                    <ion-card class="ticket-card" style="margin-left: 14px">
+                      <div class="label">Raised by Customer</div>
+                      <ion-row>
+                        <ion-col size="6" style=" border-right: 1px solid var(--card-border-color);">
+                          <div *ngIf="serviceRequestChart">
+                            <div class="chart-first">
+                              <apx-chart #serviceRequestChartRef class="chart-first"
+                                [series]="serviceRequestChart.series" [chart]="serviceRequestChart.chart"
+                                [plotOptions]="serviceRequestChart.plotOptions" [labels]="serviceRequestChart.labels"
+                                [legend]="serviceRequestChart.legend" [colors]="serviceRequestChart.colors"></apx-chart>
+                            </div>
+                            <ion-label style="display: flex;
+                      justify-content: center;">ServiceRequest - {{serviceRequestChart.value}}</ion-label>
+                          </div>
+                          <div *ngIf="!serviceRequestChart">
+                            <div class="loader loader-height">
+                              <ion-spinner></ion-spinner>
+                            </div>
+                          </div>
+                        </ion-col>
+                        <ion-col size="6">
+                          <div *ngIf="incidentChart">
+                            <div class="chart-first">
+                              <apx-chart #incidentChartRef [series]="incidentChart.series" [chart]="incidentChart.chart"
+                                [plotOptions]="incidentChart.plotOptions" [labels]="incidentChart.labels"
+                                [legend]="incidentChart.legend" [colors]="problemChart.colors"></apx-chart>
+                              <ion-label style="display: flex;
+                          justify-content: center;">Incident - {{incidentChart.value}}</ion-label>
+                            </div>
+                          </div>
+                          <div *ngIf="!incidentChart">
+                            <div class="loader loader-height">
+                              <ion-spinner></ion-spinner>
+                            </div>
+                          </div>
+                        </ion-col>
+                      </ion-row>
+                    </ion-card>
+                  </ion-col>
+                  <ion-col size="3">
+                    <ion-card class="ticket-card" style="margin-left: 14px">
+                      <div class="label">Ticket Raised by Channel</div>
+                      <ion-row>
+                        <ion-col>
+                          <div class="apex-div-wrpr" *ngIf="ticketByOriginChart">
+                            <apx-chart #ticketByOriginChartRef style="zoom: 0.6" class="campaigns"
+                              [series]="ticketByOriginChart.series" [labels]="ticketByOriginChart.labels"
+                              [dataLabels]="ticketByOriginChart.dataLabels" [chart]="ticketByOriginChart.chart"
+                              [plotOptions]="ticketByOriginChart.plotOptions" [colors]="ticketByOriginChart.colors"
+                              [legend]="ticketByOriginChart.legend"></apx-chart>
+                          </div>
+                          <div *ngIf="!ticketByOriginChart">
+                            <div class="loader loader-height">
+                              <ion-spinner></ion-spinner>
+                            </div>
+                          </div>
+                        </ion-col>
+                      </ion-row>
+                    </ion-card>
+                  </ion-col>
+                </ion-row>
+              </ion-col>
+              <ion-col size="12" *ngIf="this.ticketSummary?.total == 0">
+                <ion-row class="graph-data">
+                  <ion-col size="12" class="none-data-account" style="margin: 0px 0px 20px 0px;">
+                    <div class="main-none-container">
+                      <div class="sub-container-none">
+                        No Tickets Found</div>
+                    </div>
+                  </ion-col>
+                </ion-row>
+              </ion-col>
+              <ion-col size="12" *ngIf="this.ticketSummary == null">
+                <div>
+                  <div class="loader loader-height">
+                    <ion-spinner></ion-spinner>
+                  </div>
+                </div>
+              </ion-col>
+            </ion-row>
+            <ion-row style="margin-top: 40px;">
+              <ion-col>
+                <p style="margin-bottom: 24px;" class="common-header">Ticket History</p>
+              </ion-col>
+              <ion-col>
+                <!-- <div>
+                  <ion-buttons class="crete-req">
+                    <ion-button class="create-req-btn">
+                      <ion-icon name="add-outline" slot="start"></ion-icon>
+                      <ion-label>Create Request</ion-label>
+                    </ion-button>
+                  </ion-buttons>
+                </div> -->
+              </ion-col>
+            </ion-row>
+            <ion-row>
+              <ion-col>
+                <app-table #ticket_grid [tableDetails]="ticketTableDetails"></app-table>
+              </ion-col>
+            </ion-row>
+          </ion-grid>
+        </ion-col>
+      </ion-row>
+    </swiper-slide>
+    <swiper-slide>
+      <ion-row [hidden]="selectedTicket?.id === null" class="details-content-one">
+
+        <ion-col size="12" class="arrow-container">
+          <div>
+            <ion-img style="cursor: pointer;" (click)="backToTicketListView()"
+              src="../../../assets/chevron.svg"></ion-img>
+            <ion-label style="align-items: baseline;">Ticket no:
+              <ion-breadcrumbs>
+                <ion-breadcrumb *ngFor="let breadcrumb of breadcrumbs let i = index; let last = last">
+                  <ion-label class="common-sub-header C-P"
+                    (click)="onBreadcrumbClick(i,breadcrumb)">{{breadcrumb.caseNumber}}</ion-label>
+                  <ion-icon *ngIf="!last" slot="separator" class="C-P" name="chevron-forward-outline"></ion-icon>
+                </ion-breadcrumb>
+              </ion-breadcrumbs>
+            </ion-label>
+          </div>
+        </ion-col>
+        <ion-col size="12" class="details-body-container">
+          <ion-row>
+            <ion-col size="12">
+              <ion-card>
+                <ion-card-title class="common-header">{{ticketDetails?.subject}}</ion-card-title>
+                <ion-card-content>Description :<ion-note class="common-header">
+                    {{ticketDetails?.reason}}</ion-note><ion-img
+                    src="../../../assets/edit.svg"></ion-img></ion-card-content>
+              </ion-card>
+            </ion-col>
+            <ion-col size="12">
+              <ion-card>
+                <ion-label>Status : <span>{{ticketDetails?.status}}</span></ion-label>
+                <ion-label>Priority : <span>{{ticketDetails?.priority}}</span></ion-label>
+                <ion-label>Severity : <span>{{ticketDetails?.severity}}</span></ion-label>
+              </ion-card>
+            </ion-col>
+            <ion-col size="12">
+              <ion-label class="common-header">Related tasks</ion-label>
+            </ion-col>
+            <ion-col size="12" class="converstaion-details" *ngIf="this.ticketDetails?.task?.length">
+              <div *ngFor="let task of this.ticketDetails?.task">
+                <ion-note>{{task.taskNumber}}</ion-note>
+                <ion-note>{{task.description}}</ion-note>
+              </div>
+            </ion-col>
+            <ion-col size="12" class="none-data-account" style="margin: 0px 0px 20px 0px;"
+              *ngIf="!this.ticketDetails?.task?.length">
+              <div style="background: white;" class="main-none-container">
+                <div class="sub-container-none">
+                  No Related tasks Found</div>
+              </div>
+            </ion-col>
+            <ion-col size="12">
+              <ion-label class="common-header">Related Incident ticket</ion-label>
+            </ion-col>
+            <ion-col size="12" class="converstaion-incident" *ngIf="this.ticketDetails?.incident?.length">
+              <div *ngFor="let log of this.ticketDetails?.incident">
+                <ion-note class="C-P" (click)="onRelatedIncidentClick(log)">{{log.caseNumber}}</ion-note>
+                <ion-img class="C-P" src="../../../assets/external-link.svg"></ion-img>
+              </div>
+            </ion-col>
+            <ion-col size="12" class="none-data-account" style="margin: 0px 0px 20px 0px;"
+              *ngIf="!this.ticketDetails?.incident?.length">
+              <div style="background: white;" class="main-none-container">
+                <div class="sub-container-none">
+                  No Related Incident ticket Found</div>
+              </div>
+            </ion-col>
+            <ion-col size="12">
+              <ion-label class="common-sub-header">Activity Log</ion-label>
+            </ion-col>
+            <ion-col size="12" class="log-details" *ngIf="this.ticketDetails?.logs?.length">
+              <ion-row>
+                <ion-col>
+                  <div *ngFor="let log of this.ticketDetails?.logs">
+                    <ion-label><span>{{this.datePipe.transform(log.createdAt, commonService.date_format)}}</span>
+                      <span>{{this.datePipe.transform(log.createdAt, commonService.time_format)}}
+                      </span></ion-label>
+                    <ion-note>{{log.body}}</ion-note>
+                  </div>
+                </ion-col>
+              </ion-row>
+            </ion-col>
+            <ion-col size="12" class="none-data-account" style="margin: 0px 0px 20px 0px;"
+              *ngIf="!this.ticketDetails?.logs?.length">
+              <div style="background: white;" class="main-none-container">
+                <div class="sub-container-none">
+                  No Activity Log Found</div>
+              </div>
+            </ion-col>
+          </ion-row>
+        </ion-col>
+      </ion-row>
+    </swiper-slide>
+  </swiper-container>
+</section>

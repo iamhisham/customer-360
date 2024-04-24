@@ -1,0 +1,224 @@
+<section class="whole-content-wrapper">
+  <ion-row name="Subscription">
+    <ion-col size="12">
+      <div style="line-height: 12px;margin-bottom: 12px;">Subscriptions</div>
+    </ion-col>
+    <ion-col size="12" *ngIf="!subscriptionList">
+      <div class="loader">
+        <ion-spinner></ion-spinner>
+      </div>
+    </ion-col>
+    <ion-col class="none-data-account" *ngIf="!subscriptionList?.length">
+      <div class="main-none-container" *ngIf="subscriptionList">
+        <div class="sub-container-none">
+          No subscriptions available
+        </div>
+      </div>
+
+    </ion-col>
+    <ion-col size="12" class="card-container-wrapper" *ngIf="subscriptionList?.length">
+      <div *ngFor="let subscription of subscriptionList">
+        <div size="12" style="margin-bottom: 10px;">
+          <div class="subtitle-field">Subscription Number : <span
+              class="bold">{{subscription.subscriptionNumber}}</span></div>
+        </div>
+        <div class="card-container">
+          <!-- service card -->
+          <ion-card class="ion-no-margin card-container-details">
+            <ion-card-header class="ion-padding card-header" color="secondary-color">
+              <ion-label color="tertiary-text">Service</ion-label>
+            </ion-card-header>
+            <ion-card-content class="card-content">
+              <div class="key-value-data">
+                <ion-label class="card-left-heading">Subscription Plan : </ion-label>
+                <ion-label *ngIf="subscription?.plan" class="card-right-value roboto-regular" color="tertiary-text">
+                  {{ subscription?.plan?.name || '-' }}
+                </ion-label>
+              </div>
+              <div class="key-value-data">
+                <ion-label class="card-left-heading">Date of Commencement : </ion-label>
+                <ion-label *ngIf="subscription" class="card-right-value roboto-regular" color="tertiary-text">
+                  {{ datePipe.transform(subscription?.activatedAt, this.commonService.date_format) || '-'}}
+                </ion-label>
+              </div>
+              <div>
+                <ion-label class="card-left-heading"> Status : </ion-label>
+                <div class="active-container">
+                  <ion-icon name="ellipse" class="active-icon" *ngIf="subscription?.status === 'ACTIVE'"></ion-icon>
+                  <ion-icon name="ellipse" class="pending-icon" *ngIf="subscription?.status === 'PENDING'"></ion-icon>
+                  <ion-label *ngIf="subscription" class="card-right-value roboto-regular textCapitalize"
+                    color="tertiary-text">
+                    {{ subscription?.status || '-' }}
+                  </ion-label>
+                </div>
+              </div>
+            </ion-card-content>
+          </ion-card>
+          <!-- billing card -->
+          <ion-card class="ion-no-margin card-container-details">
+            <ion-card-header class="ion-padding card-header" color="secondary-color">
+              <ion-label>Billing</ion-label>
+            </ion-card-header>
+            <ion-card-content class="card-content" *ngIf="subscription?.billingDetails?.id">
+              <div>
+                <div>
+                  <ion-label class="card-left-heading">For: </ion-label>
+                  <ion-label class="card-right-value roboto-regular" color="tertiary-text"> {{
+                    subscription?.billingDetails?.invoiceNumber || '-' }} </ion-label>
+                </div>
+                <div>
+                  <ion-label class="card-left-heading">Due Amount : </ion-label>
+                  <ion-label class="card-right-value roboto-regular"
+                    color="tertiary-text">{{(subscription?.billingDetails?.currencyIsoCode | CurrencyPipe) }} {{
+                    (subscription?.billingDetails?.grandTotalAmount | CurrencyPipe) || '-'}}</ion-label>
+                </div>
+                <div>
+                  <ion-label class="card-left-heading">Due Date: </ion-label>
+                  <ion-label class="card-right-value roboto-regular" color="tertiary-text">{{
+                    datePipe.transform(subscription?.billingDetails?.dueDate, this.commonService.date_format) || '-'
+                    }}</ion-label>
+                </div>
+              </div>
+              <div *ngIf="subscription.billingDetails == null" class="loader">
+                <ion-spinner></ion-spinner>
+              </div>
+
+            </ion-card-content>
+            <ion-card-content class="usage-details-border bills"
+              *ngIf="subscription.billingDetails != null && !subscription.billingDetails.id">
+              <div style="width: 100%;">
+                <ion-label class="no-usage-details-label">No Pending Bills</ion-label>
+              </div>
+            </ion-card-content>
+          </ion-card>
+          <!-- usage card -->
+          <ion-card class="ion-no-margin card-container-details">
+            <ion-card-header class="ion-padding card-header" color="secondary-color">
+              <ion-label>Usage</ion-label>
+            </ion-card-header>
+            <ion-card-content style="padding: 0;">
+              <ion-row *ngIf="subscription.usageDetails !== null && subscription.status != 'PENDING';"
+                class="usage-details-border">
+                <ion-col size="8">
+                  <div class="card-content" style="border: none ;height: 96px;">
+                    <div>
+                      <ion-label class="card-left-heading">For: </ion-label>
+                      <ion-label class="left-align">{{
+                        subscription?.usageDetails?.planName || '-'}}</ion-label>
+                    </div>
+                    <div>
+                      <ion-label class="card-left-heading">Days Left: </ion-label>
+                      <ion-label class="left-align">{{subscription?.usageDetails?.daysLeft}} Days</ion-label>
+                    </div>
+                    <div style="text-wrap: nowrap;">
+                      <ion-label class="card-left-heading">Updated Date: </ion-label>
+                      <ion-label class="left-align">{{
+                        datePipe.transform(subscription?.usageDetails?.updatedDate, this.commonService.date_format) ||
+                        '-'
+                        }}</ion-label>
+                    </div>
+                  </div>
+                </ion-col>
+                <ion-col size="4">
+                  <div *ngIf="subscription?.chart">
+                    <apx-chart class="chart-style" [series]="subscription?.chart.series"
+                      [chart]="subscription?.chart.chart" [plotOptions]="subscription?.chart.plotOptions"
+                      [labels]="subscription?.chart.labels" [colors]="subscription?.chart.colors"></apx-chart>
+                  </div>
+                </ion-col>
+              </ion-row>
+              <ion-row *ngIf="subscription.status === 'PENDING'" class="usage-details-border">
+                <ion-label class="no-usage-details-label">No Usage Details</ion-label>
+              </ion-row>
+              <ion-row *ngIf="subscription.usageDetails === null && subscription.status != 'PENDING';">
+                <ion-col>
+                  <div class="card-content loader">
+                    <ion-spinner></ion-spinner>
+                  </div>
+                </ion-col>
+              </ion-row>
+            </ion-card-content>
+          </ion-card>
+        </div>
+      </div>
+    </ion-col>
+  </ion-row>
+  <ion-row name="Orders">
+    <ion-col size="12" class="open-orders">
+      <div class="title">Open Orders</div>
+      <div class="view-all" (click)="customerComp.selectTab('Orders')" *ngIf="orderDetails?.length > 3">View all</div>
+    </ion-col>
+    <ion-col size="12" class="opens-orders-card" *ngIf="orderDetails?.length">
+      <ng-container *ngFor="let openOrders of orderDetails; let i = index;">
+        <ion-card *ngIf="i < 3">
+          <ion-row>
+            <ion-col size="12">
+              <div class="m-11">
+                <ion-label>Order Number :</ion-label>
+                <ion-note> {{ openOrders?.orderNumber || '-' }} </ion-note>
+              </div>
+            </ion-col>
+            <ion-col size="12">
+              <div class="m-11">
+                <ion-label>Status :</ion-label>
+                <ion-note>
+                  <ion-chip class="textCapitalize"
+                    style="margin: 0px -1px 0px 0px; height: 16px; padding: 8px 10px 8px 10px; cursor: auto;"><ion-label
+                      class="textCapitalize" style="width: 100%; font-family: 'roboto-regular';">{{ openOrders?.status
+                      || '-' }}</ion-label></ion-chip>
+                </ion-note>
+              </div>
+            </ion-col>
+            <ion-col size="12">
+              <div class="m-11">
+                <ion-label>Ordered Date :</ion-label>
+                <ion-note>{{ this.datePipe.transform(openOrders?.orderedDate, this.commonService.date_format) || '-'
+                  }}</ion-note>
+              </div>
+            </ion-col>
+            <ion-col size="12">
+              <div class="m-4">
+                <ion-label>Amount :</ion-label>
+                <ion-note>{{ (openOrders?.currencyIsoCode | CurrencyPipe) + ' ' + (openOrders?.grandTotalAmount | CurrencyPipe) || '-' }}</ion-note>
+              </div>
+            </ion-col>
+            <!-- <ion-col size="12">
+              <ion-row>
+                <ion-col size="12">
+                  <ion-note>Task Summary
+                  </ion-note>
+                </ion-col>
+                <ion-col size="12">
+                  <div>
+                    <ion-label class="breif" [title]="openOrders?.description">{{ openOrders?.description || '-'}}</ion-label>
+                    <a>View details</a>
+                  </div>
+                </ion-col>
+              </ion-row>
+            </ion-col> -->
+          </ion-row>
+        </ion-card>
+      </ng-container>
+    </ion-col>
+    <ion-col *ngIf="!orderDetails">
+      <div class="loader">
+        <ion-spinner></ion-spinner>
+      </div>
+    </ion-col>
+    <ion-col size="12" class="none-data-account" *ngIf="(!orderDetails?.length && orderDetails?.length !=undefined) ">
+      <div class="main-none-container">
+        <div class="sub-container-none">
+          No open orders available</div>
+      </div>
+    </ion-col>
+  </ion-row>
+  <ion-row name="Task">
+    <ion-col size="12" class="task-table-container">
+      <div class="title">Tasks</div>
+      <div *ngIf="taskDetails.totalCount > 3" class="view-all">View all</div>
+    </ion-col>
+    <ion-col size="12">
+      <app-table #overview_task_grid [tableDetails]="taskDetails"></app-table>
+    </ion-col>
+  </ion-row>
+</section>

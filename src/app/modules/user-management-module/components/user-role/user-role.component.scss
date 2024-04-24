@@ -1,0 +1,30 @@
+@import '../../../../../theme/variables.scss';
+
+.whole-container {
+  padding: 40px;
+
+  .table-header {
+    display: flex;
+
+    ion-label {
+      font-size: 20px;
+      font-family: "Roboto-Medium";
+      font-weight: 500;
+      word-wrap: break-word;
+    }
+  }
+
+  .create-schedule-btn {
+    display: flex;
+    justify-content: end;
+
+    ion-button {
+      --background: var(--ion-color-primary-color);
+      cursor: pointer;
+    }
+  }
+}
+
+.M-24 {
+    margin-top: 24px;
+}

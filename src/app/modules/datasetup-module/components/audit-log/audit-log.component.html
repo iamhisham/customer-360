@@ -1,0 +1,76 @@
+<ion-content style="position: relative;">
+  <ion-grid class="ion-no-padding">
+    <ion-row class="whole-container">
+      <ion-col size="6" class="ion-no-padding table-header">
+        <ion-label>Audit Logs</ion-label>
+      </ion-col>
+      <ion-col size="6">
+        <div class="advance-setting-btn">
+          <ion-button class="ion-no-margin" (click)="advanceSearchBtn()">
+            <ion-label class="textCapitalize">Advance Search</ion-label>
+          </ion-button>
+        </div>
+      </ion-col>
+      <ion-col size="12" class="M-24">
+        <app-table #scheduler_Table [tableDetails]="schedulerTableDetails"></app-table>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>
+
+
+
+<ion-modal style="--height: 360px; --width: 600px; border-radius: 5px; --border-radius: 5px;"
+  [isOpen]="viewResults.isViewResultsModal" (willDismiss)="closeAllModel()">
+  <ng-template>
+    <ion-content class="ion-padding">
+      <ion-grid class="ion-padding">
+        <ion-row class="ion-no-padding content-wrapper">
+          <ion-col size="6" class="M-b-10 heading" style="border-bottom: 1px solid #ccc;">
+            <ion-label>View Results</ion-label>
+          </ion-col>
+          <ion-col size="6" class="M-b-10" style="display: flex;
+          justify-content: flex-end;border-bottom: 1px solid #ccc;">
+            <div class="title-container">
+              <ion-icon (click)="closeAllModel()" name="close-outline"></ion-icon>
+            </div>
+          </ion-col>
+          <ion-col size="6">
+            <p class="para" *ngIf="viewResults.type=='IMPORT'">Import Id: <span
+                class="text-label">{{viewResults.importDataId || '-'}}</span></p>
+            <p class="para" *ngIf="viewResults.type=='SCHEDULE'">Scheduler Name: <span
+                class="text-label">{{viewResults?.scheduler?.name || '-'}}</span>
+            </p>
+          </ion-col>
+          <ion-col size="6">
+            <p class="para">Start At: <span class="text-label">{{datePipe.transform(viewResults.startAt,
+                this.commonService.date_time_format)}}</span>
+            </p>
+          </ion-col>
+          <ion-col size="6">
+            <p class="para">Module name: <span class="text-label">{{viewResults.moduleName}}</span></p>
+          </ion-col>
+          <ion-col size="6">
+            <p class="para">End At: <span class="text-label">{{datePipe.transform(viewResults.endAt,
+                this.commonService.date_time_format)}}</span></p>
+          </ion-col>
+          <ion-col size="6">
+            <p class="para">Type: <span class="text-label">{{viewResults.type}}</span></p>
+          </ion-col>
+          <ion-col size="6">
+            <p class="para">Duration: <span class="text-label">{{ this.durationPipe.transform(viewResults.duration)
+                }}</span></p>
+          </ion-col>
+          <ion-col size="12" class="M-t-12">
+            <app-table [tableDetails]="viewResultsTableDetails"></app-table>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </ion-content>
+    <!-- <ion-footer>
+      <ion-toolbar>
+        <ion-button class="ion-float-right" style="padding-right: 10px;">Close</ion-button>
+      </ion-toolbar>
+    </ion-footer> -->
+  </ng-template>
+</ion-modal>

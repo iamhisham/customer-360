@@ -1,0 +1,332 @@
+<!-- <ion-header class="header-container ion-no-border">
+  <ion-toolbar>
+    <ion-grid class="ion-no-padding">
+      <ion-row class="row-wrapper">
+        <ion-col class="title-column">
+          <div lines="none" style="padding: 0px 24px 0px 24px" class="title-content  ion-no-margin ion-no-padding">
+            <h1>Error Notification</h1>
+          </div>
+        </ion-col>
+        <ion-col>
+          <div class="ion-float-right top-header-btn-wrap">
+            <ion-button title="refresh" class="create-view-btn ion-no-margin" style="min-width: 20px; margin-top:10px; margin-right: 10px; height: 41px;
+              --background: var(--ion-color-primary-color); cursor: pointer;" id="filter-popover" (click)="openFilterPopover($event)">
+              <ion-icon name="funnel-outline"></ion-icon>
+            </ion-button>
+
+            <ion-button title="refresh" class="create-view-btn ion-no-margin" style="min-width: 20px; margin-top:10px; margin-right: 10px; height: 41px;
+              --background: var(--ion-color-primary-color); cursor: pointer;" (click)="reloadAll()">
+              <ion-icon name="refresh-outline"></ion-icon>
+            </ion-button>
+
+            <ion-button title="error list" (click)="openErrorView(false)"
+              class="create-view-btn ion-no-margin  ion-float-right" style="min-width: 20px; height: 41px; margin-top:10px; margin-right: 14px;
+              --background: var(--ion-color-primary-color); cursor: pointer;">
+              <ion-icon name="list-outline"></ion-icon>
+            </ion-button>
+
+          </div>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </ion-toolbar>
+</ion-header> -->
+<ion-content>
+  <div class="wrapper">
+    <ion-grid class="ion-no-padding" class="main-grid-container">
+      <ion-row class="h-100-per">
+        <ion-col size="12" class="ion-no-padding whole-container">
+          <!-- table right div -->
+          <div class="table-media-query" style=" background-color:var(--ion-color-background);">
+            <ion-grid class=" padding-hide-md-down right-contant ion-no-padding">
+              <ion-row class="row-wrapper heading-txt-btn-wrap">
+                <ion-col class="title-column">
+                  <div class="txt-wrap">
+                    <h1>Error Notification</h1>
+                  </div>
+                </ion-col>
+                <ion-col>
+                  <div class="ion-float-right top-header-btn-wrap">
+                    <ion-button title="refresh" class="create-view-btn ion-no-margin" id="filter-popover"
+                      (click)="openFilterPopover($event)">
+                      <ion-icon name="funnel-outline"></ion-icon>
+                    </ion-button>
+
+                    <ion-button title="refresh" class="create-view-btn ion-no-margin" (click)="reloadAll()">
+                      <ion-icon name="refresh-outline"></ion-icon>
+                    </ion-button>
+
+                    <ion-button title="error list" (click)="openErrorView(false)"
+                      class="create-view-btn ion-no-margin  ion-float-right">
+                      <ion-icon name="list-outline"></ion-icon>
+                    </ion-button>
+
+                  </div>
+                </ion-col>
+              </ion-row>
+              <ion-row style="border: 1px solid var(--card-border-color);
+              display: flex;
+              flex-direction: column;
+              margin: 0px 40px;
+              padding-bottom: 22px;
+              border-radius: 6px;">
+                <ion-row style="margin: 0px 22px;">
+                  <!-- search crieraia for sm and tab -->
+                  <!-- <ion-col size-md="12" class="ion-no-padding ion-hide-lg-up">
+                  <ion-row>
+                    <ion-col size-md="3.7" offset-md="0" class=" ion-no-padding">
+                      <div class=" filterSmLabel">
+                        <div class="staticLabel ">
+                          <ion-chip [outline]="true" id="open-fiter-model-error-view">
+                            <ion-icon name="funnel-outline"></ion-icon>
+                            <ion-label class="filter_label">Search Criteria</ion-label>
+                          </ion-chip>
+                        </div>
+                      </div>
+                    </ion-col>
+                    <ion-col>
+                      <ion-modal [backdropDismiss]="false" #modal trigger="open-fiter-model-error-view"
+                        class="template-filter" animated={true}>
+                        <ng-template>
+                          <ion-header class="ion-no-border config-header">
+                            <ion-toolbar>
+                              <ion-title style="font-size: 16px;">Search Criteria</ion-title>
+                              <ion-buttons slot="end">
+                                <ion-icon (click)="onClose()" class="close_icon" name="close-outline"></ion-icon>
+                              </ion-buttons>
+                            </ion-toolbar>
+                          </ion-header>
+                          <ion-content>
+                            <ion-row>
+                              <ion-col class="aside-filter">
+                                <ng-container [ngTemplateOutlet]="notificationcontent"></ng-container>
+                              </ion-col>
+                            </ion-row>
+                          </ion-content>
+                          <ion-footer class="footer-view">
+                            <ng-container [ngTemplateOutlet]="notificationfooter"></ng-container>
+                          </ion-footer>
+                        </ng-template>
+                      </ion-modal>
+                    </ion-col>
+                  </ion-row>
+                </ion-col> -->
+                  <ion-col size-xl="6" size-lg="6" size-md="6" size-sm="12" size-xs="12"
+                    class="retry-col-wrapper ion-no-padding">
+                    <ion-label style="margin-top:2px;">
+                      <h1 class="cmn-heading">Error Statistics</h1>
+                    </ion-label>
+                  </ion-col>
+                  <ion-col size-lg="6" size-md="6" size-xs="12" size-sm="12" size-xs="12" class="ion-no-padding"
+                    style="align-self: center;">
+                    <ion-button expand="block" style="min-width: 50px; margin-left: 10px; --background: var(--ion-color-primary-color);
+                  cursor: pointer;" (click)="openErrorView(true)"
+                      class="create-view-btn ion-no-margin create-ion-button ion-float-right">
+                      <ion-label style="min-width: 80px; text-transform: none;">Error Code Statistics</ion-label>
+                    </ion-button>
+                  </ion-col>
+                </ion-row>
+                <ion-row>
+                  <ion-col class="summary-container ion-no-padding">
+                    <ion-row style="text-align:center;margin: 0px 16px;" class="top-twocard-row ">
+                      <ion-col class="ion-no-padding card-gap front-view" size-xl="4" size-lg="4" size-md="4"
+                        size-sm="12" size-xs="12">
+                        <ion-card class="ion-no-margin" class="card-container">
+                          <ion-row>
+                            <ion-col style="padding: 25px 0px 0px 0px" class="number-wrapper">
+                              <ion-label class="card-count" id="card-count-left"
+                                *ngIf="this.error.isLoaded">{{this.error.notificationCount || 0 }}</ion-label>
+                              <ion-spinner name="circular" *ngIf="!this.error.isLoaded"></ion-spinner>
+                            </ion-col>
+                          </ion-row>
+                          <ion-row>
+                            <ion-col class="card-tit-cont ion-no-padding">
+                              <ion-label class="card-name">Notifications</ion-label>
+                            </ion-col>
+                          </ion-row>
+                        </ion-card>
+                      </ion-col>
+                      <ion-col class="ion-no-padding card-gap" size-xl="4" size-lg="4" size-md="4" size-sm="12"
+                        size-xs="12">
+                        <ion-card class="ion-no-margin" class="card-container">
+                          <ion-row>
+                            <ion-col style=" padding: 25px 0px 0px 0px" class="number-wrapper">
+                              <ion-label class="card-count" *ngIf="this.error.isLoaded"
+                                id="card-count-left">{{this.error.historyCount || 0}}</ion-label>
+                              <ion-spinner name="circular" *ngIf="!this.error.isLoaded"></ion-spinner>
+                            </ion-col>
+                          </ion-row>
+                          <ion-row>
+                            <ion-col class="card-tit-cont ion-no-padding" size="12"
+                              style="display: flex; align-items: center; padding-top: 0; margin-left: 10px;">
+                              <ion-label class="card-name" style="padding-left:0px;">Individual Notification</ion-label>
+                            </ion-col>
+                          </ion-row>
+                        </ion-card>
+                      </ion-col>
+                      <ion-col class="ion-no-padding card-gap back-view" size-xl="4" size-lg="4" size-md="4"
+                        size-sm="12" size-xs="12">
+                        <ion-card class="ion-no-margin" class="card-container">
+                          <ion-row>
+                            <ion-col style=" padding: 25px 0px 0px 0px" class="number-wrapper">
+                              <ion-label class="card-count" id="card-count-left"
+                                *ngIf="this.error.isLoaded">{{this.error.userCount || 0}}</ion-label>
+                              <ion-spinner name="circular" *ngIf="!this.error.isLoaded"></ion-spinner>
+                            </ion-col>
+                          </ion-row>
+                          <ion-row>
+                            <ion-col class="card-tit-cont ion-no-padding">
+                              <ion-label class="card-name">Users</ion-label>
+                            </ion-col>
+                          </ion-row>
+                        </ion-card>
+                      </ion-col>
+                    </ion-row>
+                  </ion-col>
+                </ion-row>
+              </ion-row>
+              <ion-row style="margin: 22px 40px;">
+                <ion-col class="ion-no-padding">
+                  <ion-label style="margin-top:0px;">
+                    <p class="cmn-heading heading-mob-align" style="margin-top: 8px;">
+                      Error Individual Notifications</p>
+                  </ion-label>
+                </ion-col>
+                <ion-col class=" ion-no-padding">
+                  <ion-button
+                    *ngIf="(channelErrorList.selectedIdList || []).length == 0 && (channelErrorList.totalCount != 0)"
+                    expand="block" style="min-width: 50px; width: 130px; margin-left: 10px;--background: var(--ion-color-primary-color);
+                        cursor: pointer;" (click)="confirmationRetry()"
+                    class="create-view-btn ion-no-margin create-ion-button ion-float-right">
+                    <ion-label style="min-width: 80px; text-transform: none;">Retry All</ion-label>
+                  </ion-button>
+                  <ion-button
+                    style="min-width: 100px; margin-left: 10px; --background: var(--ion-color-primary-color);cursor: pointer; height: 38px;"
+                    *ngIf="(channelErrorList.selectedIdList || []).length > 0 &&  (channelErrorList.totalCount != 0)"
+                    class="create-view-btn ion-no-margin create-ion-button ion-float-right"
+                    (click)="confirmationRetry()">
+                    <ion-label style="padding: 20px 0px 20px 5px; text-transform: none;">Retry Selected
+                      ({{channelErrorList.selectedIdList.length}})</ion-label>
+                  </ion-button>
+                  <ion-button
+                    style="min-width: 50px; margin-left: 10px;--background: transparent; --box-shadow: none;
+                      --color: var(--ion-color-primary-color);border: 1px solid var(--ion-color-primary-color);border-radius: 6px;"
+                    *ngIf="(channelErrorList.selectedIdList || []).length> 0 && (channelErrorList.totalCount != 0)"
+                    class="create-view-btn ion-no-margin create-ion-button ion-float-right"
+                    (click)="channelErrorList.unSelectAll()">
+                    <ion-label style="text-transform: none;">Unselect All </ion-label>
+                  </ion-button>
+                </ion-col>
+              </ion-row>
+              <ion-row style="margin-left: 40px">
+                <ion-col size="11.6" class="ion-no-padding table-mob-align">
+                  <app-table #channelError_grid [tableDetails]="channelErrorList"></app-table>
+                  <!--showErrorReason start-->
+                  <ion-modal [isOpen]="errorReason.isModelOpen" class="isViewReason" [backdropDismiss]="false">
+                    <ng-template #showErrorReason class="error-wrapper">
+                      <div class="error-container">
+                        <div class="header-container">
+                          <ion-grid>
+                            <ion-row>
+                              <ion-col size="6" offset="3" class="ion-text-center">
+                                <h2 class="err-title">Error Message Details</h2>
+                              </ion-col>
+                              <ion-col size="3">
+                                <div lines="none">
+                                  <ion-icon name="close-outline" title="Close" class="closeicon test"
+                                    (click)="closeErrorMessage()" style="float:right"></ion-icon>
+                                </div>
+                              </ion-col>
+                            </ion-row>
+                          </ion-grid>
+                        </div>
+                        <div class="err-content" style="margin: 0px 35px; ">
+                          <div style="display: flex;justify-content: start; width: 100%; margin: 8px 0px;">
+                            <div>
+                              <p style="margin: 0px;width: 100px;"><b>Error Code </b></p>
+                            </div>
+                            <div><b>:&nbsp;&nbsp;</b></div>
+                            <div>
+                              <p style="margin: 0px;"> {{ errorReason.error_code || "No error code found" }}</p>
+                            </div>
+                          </div>
+                          <div style="display: flex;justify-content: start; width: 100%; margin: 8px 0px;">
+                            <div>
+                              <p style=" margin: 0px; width: 100px;"><b>Error Message </b></p>
+                            </div>
+                            <div><b>:&nbsp;&nbsp;</b></div>
+                            <div>
+                              <p style="margin: 0px;"> {{errorReason.error_message===null? "No error occured"
+                                :errorReason.error_message }}</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </ng-template>
+                  </ion-modal>
+                </ion-col>
+              </ion-row>
+            </ion-grid>
+          </div>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </div>
+
+  <ion-modal class="bug-modal-popup" [isOpen]="isErrorModalOpen" [backdropDismiss]="false">
+    <ng-template>
+      <ion-content class="ion-padding" style="--background: var(--ion-color-background);">
+        <div style="margin-top: 16px;">
+          <ion-grid class="ion-no-padding">
+            <ion-row class="ion-no-padding">
+              <ion-col class="ion-no-padding ion-padding-horizontal" size="12">
+                <div class="table-top-layer-btns">
+                  <div>
+                    <h1 *ngIf="showErrorCount == false" class="cmn-heading" style="margin-top: 10px; ">
+                      Error Code
+                      Details</h1>
+                    <h1 *ngIf="showErrorCount == true" class="cmn-heading" style="margin-top: 10px; ">
+                      Error Code Statistics <span style="font-size: 16px;">(Error Count - {{totalErrorCount}})</span>
+                    </h1>
+                  </div>
+                  <div style="display: flex;">
+                    <ion-searchbar (ionChange)="errorDisplayGrid?.search()" *ngIf="showErrorCount == false"
+                      [(ngModel)]="errorViewList.search" placeholder="Search" show-clear-button="always"
+                      class="ion-custom-search ion-no-padding ">
+                    </ion-searchbar>
+                    <ion-searchbar (ionChange)="errorCountDisplayGrid?.search()" *ngIf="showErrorCount == true"
+                      [(ngModel)]="errorDetailViewList.search" placeholder="Search" show-clear-button="always"
+                      class="ion-custom-search ion-no-padding ">
+                    </ion-searchbar>
+                    <div style=" text-align: end;float: right; height: 40px;display: flex; justify-content: center;
+                      align-items: center;">
+                      <ion-icon name="close-outline" style="font-size: 30px; cursor: pointer;"
+                        (click)="isErrorModalOpen = false;"></ion-icon>
+                    </div>
+                  </div>
+                </div>
+              </ion-col>
+            </ion-row>
+            <ion-row class="ion-no-padding">
+              <ion-col size="12" class="ion-margin-top ion-no-padding ion-padding-horizontal">
+                <app-table #error_display_grid *ngIf="showErrorCount == false"
+                  [tableDetails]="errorViewList"></app-table>
+                <app-table #error_count_display_grid *ngIf="showErrorCount == true"
+                  [tableDetails]="errorDetailViewList"></app-table>
+              </ion-col>
+            </ion-row>
+          </ion-grid>
+        </div>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+</ion-content>
+
+<ion-popover trigger="filter-popover" class="ion-filter-popover" side="left" #filterPopover>
+  <ng-template>
+    <div class="filter-component-wrapper customScroller">
+      <app-data-table-search-criteria #error_page [filterFieldList]="filterFieldList"
+        (applySearch)="applyFilter($event)"></app-data-table-search-criteria>
+    </div>
+  </ng-template>
+</ion-popover>

@@ -1,0 +1,25 @@
+@import '../../../../../theme/variables.scss';
+
+ion-grid {
+  padding: 40px;
+
+  ion-col {
+    padding: 0;
+  }
+
+  .title {
+    font-size: 20px;
+    font-family: "Roboto-Medium";
+    font-weight: 500;
+    word-wrap: break-word;
+  }
+
+  .create-button {
+    display: flex;
+    justify-content: flex-end;
+
+    ion-button {
+      --background: var(--ion-color-primary-color)
+    }
+  }
+}

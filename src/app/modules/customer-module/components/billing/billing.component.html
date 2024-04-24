@@ -1,0 +1,60 @@
+<section>
+  <div class="heading-label-wrap">
+    <ion-label>Pending Payment</ion-label>
+  </div>
+  <div class="data-content-wrapper">
+    <ion-grid class="ion-no-padding">
+      <ion-row *ngIf="(billDetails?.length == 0)">
+        <ion-col size="12" class="none-data-account">
+          <div class="main-none-container">
+            <div class="sub-container-none">
+              No pending payment</div>
+          </div>
+        </ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col size="12">
+          <ng-container *ngIf="!billDetails">
+            <div class="loader">
+              <ion-spinner></ion-spinner>
+            </div>
+          </ng-container>
+        </ion-col>
+        <ion-col size="12" class="ion-no-padding">
+          <ng-container *ngIf="billDetails">
+            <div class="bill-card-container" *ngFor="let bill of billDetails">
+              <div class="each-bill-wrap">
+                <ion-note color="secondary-color">Invoice Number</ion-note>
+                <ion-text color="primary-color">{{bill.invoiceNumber}}</ion-text>
+              </div>
+              <div class="each-bill-wrap">
+                <ion-note color="secondary-text">Invoice Date</ion-note>
+                <ion-text color="primary-text">{{bill.invoiceDate}}</ion-text>
+              </div>
+              <div class="each-bill-wrap">
+                <ion-note color="secondary-text">Due Date </ion-note>
+                <ion-text color="primary-text">{{bill.dueDate}}</ion-text>
+              </div>
+              <div class="each-bill-wrap">
+                <ion-note color="secondary-text">Due Amount</ion-note>
+                <ion-text color="primary-text"> {{(bill.currencyIsoCode | CurrencyPipe)}} {{(bill.grandTotalAmount | CurrencyPipe)}}</ion-text>
+              </div>
+              <div class="pay-btn-wrap">
+                <ion-button color="primary-color" class="ion-no-margin">
+                  <ion-label>Pay {{(bill.currencyIsoCode | CurrencyPipe)}} {{(bill.grandTotalAmount | CurrencyPipe)}}</ion-label>
+                </ion-button>
+              </div>
+            </div>
+          </ng-container>
+          <div class="heading-label-wrap" style="margin: 40px 0px 12px 0px;">
+            <ion-label>Payment History</ion-label>
+          </div>
+          <!-- Invoice History -->
+          <div class="invoice-history-wrapper">
+            <app-table #bill_grid [tableDetails]="billingDetails"></app-table>
+          </div>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </div>
+</section>

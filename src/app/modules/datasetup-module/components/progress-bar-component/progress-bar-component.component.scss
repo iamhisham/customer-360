@@ -1,0 +1,127 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  align-items: center;
+  background-color: var(--bg-color);
+  display: flex;
+  font-family: "Muli", sans-serif;
+  height: 100vh;
+  justify-content: center;
+  margin: 0;
+  overflow: hidden;
+}
+
+.contaienr {
+  text-align: center;
+}
+
+.progress-container {
+  display: flex;
+  justify-content: space-between;
+  margin: 30px;
+  max-width: 100%;
+  position: relative;
+  width: 800px;
+}
+
+.progress-container::before {
+  background-color: var(--line-border-empty);
+  content: "";
+  height: 4px;
+  left: 0;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 100%;
+  z-index: var(--progress-zIndex);
+}
+
+.progress {
+  background-color: var(--ion-color-primary-color);
+  height: 4px;
+  left: 0;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  transition: 0.4s ease;
+  width: 0%;
+  z-index: var(--progress-zIndex);
+}
+
+.circle {
+  align-items: center;
+  background-color: #fff;
+  // border: 3px solid #e0e0e0;
+  border-radius: 50%;
+  color: #999;
+  display: flex;
+  height: 27px;
+  justify-content: center;
+  transition: 0.4 ease;
+  width: 27px;
+}
+
+.circle.active {
+  border: 8x solid var(--ion-color-primary-color);
+}
+
+.circle.active {
+  border: 8px solid var(--ion-color-primary-color);
+
+  &.tick {
+    background-color: var(--ion-color-primary-color);
+
+    ion-icon {
+      color: #fff;
+      position: absolute;
+      zoom: 1.3;
+    }
+  }
+}
+
+.btn {
+  background-color: var(--ion-color-primary-color);
+  border: 0;
+  border-radius: 6px;
+  color: #fff;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 14px;
+  margin: 5px;
+  padding: 8px 30px;
+}
+
+.btn:active {
+  transform: scale(0.98);
+}
+
+.btn:focus {
+  outline: 0;
+}
+
+.btn:disabled {
+  background-color: var(--line-border-empty);
+  cursor: not-allowed;
+}
+
+.not-active-img {
+  height: 40px;
+  width: 40px;
+}
+
+.title-wrapper {
+  position: absolute;
+  top: 34px;
+  width: 150px;
+  text-align: center;
+}
+
+.title-wrapper .active {
+  color: var(--ion-color-primary-color);
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}

@@ -1,0 +1,165 @@
+<!-- <ion-app> -->
+<ng-container>
+  <div class="parent-container">
+    <ng-container *ngTemplateOutlet="flowChart; context: { stepList }"></ng-container>
+    <ng-template #flowChart let-stepList="stepList">
+      <div class="outer-header">
+        <div class="header">
+          <div *ngFor="let step of stepList let i = index">
+            <!-- <div align="center" *ngIf="step.type === 'START'">
+              <div class="icon-height"></div>
+              <div class="card">
+                {{step.name}}
+              </div>
+              <ng-container *ngTemplateOutlet="addButton context:{ stepList, index: i}"></ng-container>
+            </div> -->
+            <div align="center" *ngIf="step.type === 'START' || step.type === 'STEP'">
+              <div class="arrow-down" *ngIf="step.type === 'STEP'"></div>
+              <div class="card">
+                {{step.name}}
+                <div>
+                  <div class="delete-wrapper" *ngIf="step.type === 'STEP'">
+                    <ion-icon name="create-outline" (click)="popoverOpen($event, stepList, i, 'updatePopover')"
+                      style="float: right;font-size: 20px"></ion-icon>
+                    <ion-icon name="trash-outline" (click)="deleteStep(stepList, i)"
+                      style="float: right;font-size: 20px"></ion-icon>
+                  </div>
+                </div>
+              </div>
+              <div *ngIf="!step.children || step.children.length == 0">
+                <ng-container
+                  *ngTemplateOutlet="addButton context:{ stepList, index: i, includeAddChild: true}"></ng-container>
+              </div>
+            </div>
+            <div *ngIf="step.children?.length > 0" align="center">
+              <div class="dynamic-grid">
+                <div class="height"></div>
+                <div class="height border-left"></div>
+              </div>
+              <div class="dynamic-grid reduce-height">
+
+                <div class="height" *ngFor="let _ of [].constructor(step.children?.length * 2); let i = index"
+                  [ngClass]="{'border-top': i !== 0 && i < ((step.children?.length * 2) -1), 'border-left': i % 2 !== 0}">
+                </div>
+              </div>
+              <div style="height: 15px;margin-top: -15px;z-index:1px;">
+                <ion-img class="addButton" src="../../assets/trash.svg" (click)="deleteChildren(stepList, i)"></ion-img>
+              </div>
+              <div class="dynamic-grid">
+                <div *ngFor="let _ of [].constructor(step.children?.length); let i = index">
+                  <ng-container
+                    *ngTemplateOutlet="addButton context:{ stepList: step.children[i].flowList, index: -1}"></ng-container>
+                </div>
+              </div>
+              <div class="dynamic-grid">
+                <div align="center" class="display-flex"
+                  *ngFor="let _ of [].constructor(step.children?.length); let i = index">
+                  <ng-container
+                    *ngTemplateOutlet="flowChart; context:{ stepList: step.children[i].flowList, index: i}"></ng-container>
+                  <div class="grow dynamic-grid">
+                    <div></div>
+                    <div></div>
+                    <div class="border-left"></div>
+                    <div></div>
+                  </div>
+                </div>
+              </div>
+              <div class="dynamic-grid reduce-height">
+                <div class="height" *ngFor="let _ of [].constructor(step.children?.length * 2); let i = index"
+                  [ngClass]="{'border-bottom': i !== 0 && i < ((step.children?.length * 2) -1), 'border-left': i % 2 !== 0}">
+                </div>
+              </div>
+              <div>
+                <ng-container *ngTemplateOutlet="addButton context:{ stepList, index: i}"></ng-container>
+              </div>
+            </div>
+            <div align="center" *ngIf="step.type === 'END'">
+              <div class="arrow-down"></div>
+              <!-- <div class="icon-height"></div> -->
+              <div class="card">
+                {{step.name}}
+              </div>
+              <!-- <div class="icon-height"></div> -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </ng-template>
+  </div>
+</ng-container>
+
+
+<!-- Add button -->
+<ng-template #addButton let-index="index" let-stepList="stepList" let-includeAddChild="includeAddChild">
+  <div class="dynamic-grid">
+    <div class="height"></div>
+    <div class="height border-left"></div>
+  </div>
+  <div align="center">
+    <ion-img (click)="popoverOpen($event, stepList, index, 'stepPopover', includeAddChild)" class="addButton"
+      src="../../assets/notificationJurneyIcon/addButton.svg"></ion-img>
+  </div>
+  <div class="dynamic-grid">
+    <div class="height"></div>
+    <div class="height border-left"></div>
+  </div>
+</ng-template>
+
+<!-- Popover Content -->
+<ion-popover class="popover ion-no-padding" #stepPopover [isOpen]="popoverObj.isObjectMapping" [dismissOnSelect]="true"
+  (didDismiss)="popoverObj.isObjectMapping = false">
+  <ng-template>
+    <ion-content>
+      <ion-searchbar (input)="onSearch($event)" [(ngModel)]="searchTerm" class="search-input"
+        (click)="$event.stopPropagation()" fill="outline" placeholder="Search"></ion-searchbar>
+      <ion-list class="ion-no-padding">
+        <div class="title">
+          <ion-label>Options</ion-label>
+        </div>
+        <div *ngIf="filteredStepNameList.length">
+          <div class="label" (click)="addStep(list)" *ngFor="let list of filteredStepNameList">
+            <ion-label *ngIf="list.length">
+              <img src="../../assets/notificationJurneyIcon/startStopIcon.svg">
+              {{list}}
+            </ion-label>
+          </div>
+        </div>
+        <div class="no-child-found" *ngIf="!filteredStepNameList.length">
+          <ion-label>
+            No Object Mapped Attributes Found
+          </ion-label>
+        </div>
+        <div class="add-children" *ngIf="selectedRef.includeAddChild">
+          <ion-button color="primary-color" (click)="addChildren()">
+            <ion-label>
+              <span><ion-icon style="font-size: 17px;" name="add-outline"></ion-icon></span>Add Children
+            </ion-label>
+          </ion-button>
+        </div>
+      </ion-list>
+    </ion-content>
+  </ng-template>
+</ion-popover>
+
+
+<!-- Update popover -->
+<ion-popover class="popover ion-no-padding" #editpopover [isOpen]="popoverObj.isUpdate" [dismissOnSelect]="true"
+  (didDismiss)="popoverObj.isUpdate = false">
+  <ng-template>
+    <ion-content>
+      <ion-searchbar (input)="onSearch($event)" [(ngModel)]="searchTerm" (click)="$event.stopPropagation()"
+        class="search-input" fill="outline" placeholder="Search"></ion-searchbar>
+      <ion-list class="ion-no-padding">
+        <div class="title">
+          <ion-label>Update Flow</ion-label>
+        </div>
+        <div class="label" (click)="updateStep(list)" *ngFor="let list of filteredStepNameList">
+          <ion-label>
+            <img src="../../assets/notificationJurneyIcon/startStopIcon.svg">
+            {{list}}
+          </ion-label>
+        </div>
+      </ion-list>
+    </ion-content>
+  </ng-template>
+</ion-popover>

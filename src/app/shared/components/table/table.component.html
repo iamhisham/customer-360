@@ -1,0 +1,467 @@
+<!-- eslint-disable @angular-eslint/template/eqeqeq -->
+<ng-template #action_item let-element="element" let-action="action">
+  <ion-item class="btn-text" *ngIf="!action.clickFunction ? (action.isValid ? action.isValid(element) : true) :  false"
+    [button]="true" [routerLink]="element.action[action.attr]"
+    [queryParams]="element.action[action.attr + '_queryParam'] || {}">{{action.name}}
+  </ion-item>
+  <ion-item class="btn-text" *ngIf="action.clickFunction && (!action.isValid || action.isValid(element))"
+    [button]="true" (click)="action.clickFunction(element)">{{action.name}}
+  </ion-item>
+</ng-template>
+<ion-row class="table-outer-container">
+  <ion-col size-md="12" size-sm="12" size-xs="12" class="ion-no-padding">
+    <section class=" mat-elevation-z8 table-outer-layout" #mytable>
+      <table mat-table [dataSource]="dataSource" matSort>
+        <ng-container matColumnDef="checkbox" *ngIf="tableDetails.isSelectableGrid">
+          <th mat-header-cell *matHeaderCellDef aria-label="row actions" class="right-arrow">
+            <mat-checkbox #selectAllCheckbox (change)="selectAllRowInCurrentView($event);" [disabled]="totalCount==0"
+              [checked]="currentView.isAllSelected" [indeterminate]="currentView.isInterminateSelected">
+            </mat-checkbox>
+          </th>
+          <td mat-cell *matCellDef="let element">
+            <mat-checkbox (change)="selectRow($event, element);"
+              [disabled]="tableDetails.isCheckboxVisible ? !tableDetails.isCheckboxVisible(element) : false"
+              [checked]="tableDetails.selectedIdList.indexOf(element[tableDetails.pk]) != -1">
+            </mat-checkbox>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="{{field.attr}}" *ngFor="let field of tableDetails.fields">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header [disabled]="field.disableSort"
+            class="{{field.className}} w-{{field.width}}">
+            <span class="{{field.className}}">{{field.name}}</span>
+            <div (click)="openFilterPopover($event, field)" class="filter-container" *ngIf="field.filterType">
+              <ion-icon [name]="filterDetails[field.filterAttr || field.attr] ? 'funnel': 'funnel-outline'"
+                class="ion-float-right" [ngClass]="{'highlightFilter': filterDetails[field.attr] }"></ion-icon>
+            </div>
+          </th>
+
+          <td mat-cell *matCellDef="let element" class="w-{{field.width}} {{field.className}}"
+            [ngClass]="{'P-12': field.type === 'chip'}">
+            <span>{{(field.type||'TEXT') == 'TEXT'?element[field.attr] || '-' : ''}}</span>
+            <span
+              *ngIf="(field.type=='DATE' && element[field.attr] && element[field.attr] !== '-')">{{(element[field.attr]
+              | date: field.format)}}</span>
+            <!-- {{field.type=='DATE'?(element[field.attr] | date: field.format) || '-' : ''}} -->
+            <a *ngIf="field.type == 'LINK'" [routerLink]="element.link[field.attr]">{{element[field.attr]}}</a>
+
+            <a *ngIf="field.type == 'CLICK'" class="cursor-pointer"
+              (click)="field.clickFunction(element)">{{element[field.attr]}}</a>
+
+            <!-- template image icons -->
+            <div class="channals_logo" *ngIf="field.type === 'IMAGE_LIST'">
+              <span *ngFor="let img of element[field.attr]" [title]="img.title">
+                <ion-icon class="pointer-none ion-margin-end" [name]="img.name"
+                  style="color: var(--ion-color-primary)"></ion-icon></span>
+            </div>
+            <div *ngIf="field.type == 'chip' && element[field.attr]" class="chip-wrapper {{field.className}} ">
+              <ion-chip class="chip-element"><ion-label
+                  class="{{field.className}}">{{element[field.attr]}}</ion-label></ion-chip>
+            </div>
+            <div *ngIf="field.type == 'chip' && !element[field.attr]" class="chip-wrapper {{field.className}} ">
+              <ion-label class="{{field.className}}"> - </ion-label>
+            </div>
+
+            <!-- notification single or bulk icons -->
+            <ion-img class="user-icon" *ngIf="field.type === 'IMAGE'" [src]="element[field.attr].src"
+              [title]="element[field.attr].title"></ion-img>
+
+            <!-- download DOCUMENT & EMAIL icons -->
+            <ion-icon color="primary-color" class="doc-icon cursor-pointer" name="document-text-outline"
+              *ngIf="field.type === 'DOWNLOAD_ACTION'"></ion-icon>
+            <ion-icon color="primary-color" class="mail-icon cursor-pointer" name="mail-outline"
+              *ngIf="field.type === 'DOWNLOAD_ACTION'"></ion-icon>
+          </td>
+        </ng-container>
+
+        <!-- Star Column -->
+        <ng-container matColumnDef="final" stickyEnd *ngIf="(tableDetails.actions || []).length > 0">
+          <th mat-header-cell *matHeaderCellDef aria-label="row actions" class="right-arrow">
+            <!-- rest filtr and column config -->
+            <ion-icon name="filter" class="cursor-pointer three-dot" (click)="headerTopPopover($event)"></ion-icon>
+            <!-- <ion-img class="cursor-pointer" style="width: 20px; height: 20px" *ngIf="isFilterDetailsEmpty()"
+              src="../../assets/icons/filter-off-line.svg" (click)="resetAllFilter()"></ion-img>
+            <ion-icon name="chevron-forward-outline" class="ion-hide-md-up" style="font-size: 23px;">
+            </ion-icon> -->
+          </th>
+          <td mat-cell *matCellDef="let element; let i = index"
+            [ngClass]="{'white-background': i % 2 === 0, 'blue-background': i % 2 !== 0}">
+            <ion-icon [id]="tableDetails.name + '_' + element[tableDetails.pk]" name="ellipsis-vertical"
+              class="cursor-pointer three-dot"></ion-icon>
+            <ion-popover [trigger]="tableDetails.name + '_' + element[tableDetails.pk]" side="left"
+              [dismissOnSelect]="true" class="grid-action-popover">
+              <ng-template>
+                <ion-content>
+                  <ion-list style="padding: 0;" *ngFor="let action of tableDetails.actions">
+                    <ng-template [ngIf]="action.isVisible ? action.isVisible(element) : true">
+                      <ng-container
+                        *ngTemplateOutlet="action_item; context: {element: element, action: action}"></ng-container>
+                    </ng-template>
+
+                  </ion-list>
+                </ion-content>
+              </ng-template>
+            </ion-popover>
+          </td>
+        </ng-container>
+        <ng-container class="none-data">
+          <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns; "></tr>
+          <tr style="height: 120px;" class="mat-row" *matNoDataRow>
+            <td class="mat-cell" style="border: none; font-size: medium;" [attr.colspan]="displayedColumns.length">
+              <section class="none-data-account">
+                <div class="loader" *ngIf="showLoadingIcon">
+                  <ion-spinner></ion-spinner>
+                </div>
+                <div class="main-none-container" *ngIf="!showLoadingIcon">
+                  <div class="sub-container-none">
+                    No {{tableDetails.name}} found <span style="color: red;">{{tableDetails.search}}</span>
+                  </div>
+                </div>
+              </section>
+            </td>
+          </tr>
+        </ng-container>
+      </table>
+    </section>
+  </ion-col>
+  <ion-col [ngClass]="{'ion-hide': (tableDetails.isPageNationDisable || totalCount <= 5)}" size-md="12" size-sm="12"
+    size-xs="12" class="ion-no-padding">
+    <div class="paginator-footer">
+      <mat-paginator [pageSizeOptions]="[5,10,25,50,100]" [pageSize]="pageSize" class="mat-paginator-sticky"
+        (page)="pageChanged($event)" aria-label="Select page">
+      </mat-paginator>
+    </div>
+  </ion-col>
+</ion-row>
+
+<ion-popover #filterPopover side="left" alignment="start" class="filter-popover" [isOpen]="currentFilter.isOpen"
+  (didDismiss)="closeFilterPopover();">
+  <ng-template>
+    <ion-content class="filterContent">
+      <div>
+        <p class="title" *ngIf="currentFilter.type != 'ENUMS'">Condition</p>
+        <ion-item fill="outline" lines="none" class="select-item" *ngIf="currentFilter.type != 'ENUMS'">
+          <ion-select label="" labelPlacement="stacked" class="ion-no-padding" [(ngModel)]="currentFilter.cond"
+            [interfaceOptions]="tablefilterPopoverOptions" placeholder="-Select-" name="gender" interface="popover">
+            <ion-select-option [value]="obj.value"
+              *ngFor="let obj of possibleFilterCond[currentFilter.type]">{{obj.name}}</ion-select-option>
+          </ion-select>
+        </ion-item>
+        <!-- TEXT -->
+        <p class="title"
+          *ngIf="(currentFilter.type != 'ENUMS' && currentFilter.type != 'DURATION') && currentFilter.cond !='null' &&  currentFilter.cond !='notnull'">
+          Value </p>
+        <ion-item fill="outline" lines="none"
+          *ngIf="currentFilter.type == 'TEXT'  && currentFilter.cond !='null' &&  currentFilter.cond !='notnull'">
+          <ion-input name="text-filter" [(ngModel)]="currentFilter.value" placeholder="Enter text"
+            type="text"></ion-input>
+        </ion-item>
+        <!-- ENUMS CONTENT-->
+        <div class="scrollable-content customScroller" *ngIf="currentFilter.type == 'ENUMS'">
+          <div class="box">
+            <div style="z-index: 1; position: sticky; top:0px;width:100%;background: white;">
+              <p class="title" style="margin-bottom: 10px;" *ngIf="currentFilter.selectedEnums.length != 0">Selected
+                value
+                (<span>{{currentFilter.selectedEnums.length}}</span>)</p>
+              <p class="title" style="margin-bottom: 10px;" *ngIf="currentFilter.selectedEnums.length == 0">Select the
+                value</p>
+              <div *ngIf="currentFilter.enums.length > 5">
+                <ion-searchbar class="ion-no-padding" placeholder="Search"
+                  [(ngModel)]="currentFilter.searchValue"></ion-searchbar>
+              </div>
+              <ion-item *ngIf="currentFilter.searchValue == ''" class="enum_list allEnum" lines="none">
+                <ion-checkbox style="margin: 0px;" (click)="selectOrUnselectAllEnums($event)"
+                  [indeterminate]="currentFilter.selectedEnums.length > 0 && currentFilter.selectedEnums.length !== currentFilter.enums.length"
+                  [checked]="currentFilter.selectedEnums.length === currentFilter.enums.length"></ion-checkbox>
+                <ion-label
+                  style="margin: 0px; padding: 22px 16px 20px 16px;text-wrap: nowrap;overflow: hidden;text-overflow: ellipsis;">
+                  All </ion-label>
+              </ion-item>
+            </div>
+            <ion-list class="enum_list">
+              <ion-item *ngFor="let list of currentFilter.enums | filter:{ name : currentFilter.searchValue }" class=""
+                lines="none">
+                <ion-checkbox style="margin: 0px;" (click)="selectEnum($event, list.value)"
+                  [checked]="currentFilter.selectedEnums.indexOf(list.value) !== -1"></ion-checkbox>
+                <ion-label
+                  style="margin: 0px; padding: 22px 16px 20px 16px;display: flex; align-items: center;text-wrap: nowrap;overflow: hidden;text-overflow: ellipsis;">
+                  <ion-img class="user-icon" *ngIf="list.imageSrc" [src]="list.imageSrc"
+                    style="margin-right: 10px"></ion-img>
+                  <ion-icon class="user-icon" *ngIf="list.iconName" [name]="list.iconName"
+                    style="margin-right: 10px"></ion-icon>
+                  <span>{{list.name}}</span>
+                </ion-label>
+              </ion-item>
+            </ion-list>
+          </div>
+        </div>
+        <!-- ID -->
+        <ion-item fill="outline" lines="none"
+          *ngIf="currentFilter.type == 'ID'  && currentFilter.cond !='null' &&  currentFilter.cond !='notnull'">
+          <ion-input name="id-filter" [(ngModel)]="currentFilter.value"
+            [placeholder]="['in', 'notIn'].indexOf(currentFilter.cond) != -1 ? 'Enter ID with comma seperator' : 'Enter ID'"
+            [type]="['in', 'notIn'].indexOf(currentFilter.cond) != -1 ? 'text' : 'number'"></ion-input>
+        </ion-item>
+        <!-- DURATION -->
+        <ion-item lines="none"
+          *ngIf="(currentFilter.type == 'DURATION'  && currentFilter.cond != 'bwt') && currentFilter.cond !='null' &&  currentFilter.cond !='notnull'"
+          class="duration-item-without-Bwt">
+          <div style="display: flex;">
+            <div style="margin-right: 12px; width: 45%;">
+              <ion-label>Value</ion-label>
+              <ion-item lines="none" fill="outline" style="--inner-padding-end: 0px">
+                <ion-input name="number-filter" [(ngModel)]="currentFilter.value" placeholder="Number"
+                  type="number"></ion-input>
+              </ion-item>
+            </div>
+            <div style="width: 55%;">
+              <ion-label>Unit</ion-label>
+              <ion-item lines="none" fill="outline">
+                <ion-select value="ms" [(ngModel)]="currentFilter.unit" placeholder="-select-" interface="popover"
+                  style="min-height: 32px;">
+                  <ion-select-option value="ms">Milliseconds</ion-select-option>
+                  <ion-select-option value="sec">Seconds</ion-select-option>
+                  <ion-select-option value="min">Minutes</ion-select-option>
+                  <ion-select-option value="hr">Hours</ion-select-option>
+                </ion-select>
+              </ion-item>
+            </div>
+          </div>
+        </ion-item>
+
+        <ion-item lines="none"
+          *ngIf="(currentFilter.type == 'DURATION'  && currentFilter.cond == 'bwt') && currentFilter.cond !='null' &&  currentFilter.cond !='notnull'"
+          class="duration-item-withBwt">
+          <div style="display: flex;flex-direction: column">
+            <div style="display: flex; margin-bottom: 8px;">
+              <div style="margin-right: 12px; width: 45%;">
+                <ion-label>Value</ion-label>
+                <ion-item lines="none" fill="outline" style="--inner-padding-end: 0px">
+                  <ion-input name="number-filter" [(ngModel)]="currentFilter.value" placeholder="Number"
+                    type="number"></ion-input>
+                </ion-item>
+              </div>
+              <div style="width: 55%;">
+                <ion-label>Unit</ion-label>
+                <ion-item lines="none" fill="outline" style="--inner-padding-end: 0px">
+                  <ion-select value="ms" [(ngModel)]="currentFilter.unit" placeholder="-select-" interface="popover"
+                    style="min-height: 32px;">
+                    <ion-select-option value="ms">Milliseconds</ion-select-option>
+                    <ion-select-option value="sec">Seconds</ion-select-option>
+                    <ion-select-option value="min">Minutes</ion-select-option>
+                    <ion-select-option value="hr">Hours</ion-select-option>
+                  </ion-select>
+                </ion-item>
+              </div>
+            </div>
+            <div style="display: flex;">
+              <div style="margin-right: 12px; width: 45%;">
+                <ion-label>Value 2</ion-label>
+                <ion-item lines="none" fill="outline" style="--inner-padding-end: 0px">
+                  <ion-input name="number-filter" [(ngModel)]="currentFilter.value2" placeholder="Number"
+                    type="number"></ion-input>
+                </ion-item>
+              </div>
+              <div style="width: 55%;">
+                <ion-label>Unit</ion-label>
+                <ion-item lines="none" fill="outline">
+                  <ion-select value="ms" [(ngModel)]="currentFilter.unit" placeholder="-select-" interface="popover"
+                    style="min-height: 32px;">
+                    <ion-select-option value="ms">Milliseconds</ion-select-option>
+                    <ion-select-option value="sec">Seconds</ion-select-option>
+                    <ion-select-option value="min">Minutes</ion-select-option>
+                    <ion-select-option value="hr">Hours</ion-select-option>
+                  </ion-select>
+                </ion-item>
+              </div>
+            </div>
+          </div>
+        </ion-item>
+        <!-- NUMBER -->
+        <ion-item fill="outline" lines="none"
+          *ngIf="(currentFilter.type == 'NUMBER' && currentFilter.cond != 'bwt') && currentFilter.cond !='null' &&  currentFilter.cond !='notnull'">
+          <ion-input name="number-filter" [(ngModel)]="currentFilter.value" placeholder="Enter number"
+            type="number"></ion-input>
+        </ion-item>
+        <!-- NUMBER BETWEEN - Two values -->
+        <ion-row class="ion-no-padding" class="bwtn-layer"
+          *ngIf="(currentFilter.type == 'NUMBER' && currentFilter.cond == 'bwt') && currentFilter.cond !='null' &&  currentFilter.cond !='notnull'">
+          <ion-col class="ion-no-padding" size="12">
+            <p>Start date</p>
+            <ion-item fill="outline" lines="none">
+              <ion-input name="number-filter-1" [(ngModel)]="currentFilter.value" placeholder="Enter number"
+                type="number"></ion-input>
+            </ion-item>
+          </ion-col>
+          <ion-col class="ion-no-padding" size="12">
+            <p>End date</p>
+            <ion-item fill="outline" lines="none">
+              <ion-input name="number-filter-2" [(ngModel)]="currentFilter.value2" placeholder="Enter number"
+                type="number"></ion-input>
+            </ion-item>
+          </ion-col>
+        </ion-row>
+        <!-- date -->
+        <ion-item fill="outline" lines="none"
+          *ngIf="(currentFilter.type == 'DATE' && currentFilter.cond != 'bwt') && currentFilter.cond !='null' &&  currentFilter.cond !='notnull'">
+          <ion-input name="date-filter" [(ngModel)]="currentFilter.value" placeholder="Select date"
+            type="date"></ion-input>
+        </ion-item>
+        <!-- date BETWEEN -> TWO values -->
+        <!-- <ion-row class="ion-no-padding bwtn-layer" *ngIf="currentFilter.type == 'DATE' && currentFilter.cond == 'bwt'">
+          <ion-col class="ion-no-padding" size="12">
+            <p>Start date</p>
+            <ion-item fill="outline" lines="none">
+              <ion-input name="date-filter-1" [(ngModel)]="currentFilter.value" placeholder="Select Date"
+                type="date"></ion-input>
+            </ion-item>
+          </ion-col>
+          <ion-col class="ion-no-padding" size="12">
+            <p>End date</p>
+            <ion-item fill="outline" lines="none">
+              <ion-input name="date-filter-2" [(ngModel)]="currentFilter.value2" placeholder="Select Date"
+                type="date"></ion-input>
+            </ion-item>
+          </ion-col>
+        </ion-row> -->
+        <!-- DATETIME -->
+        <ion-item lines="none" fill="outline"
+          *ngIf="(currentFilter.type == 'DATETIME' && currentFilter.cond != 'bwt') && currentFilter.cond !='null' &&  currentFilter.cond !='notnull'">
+          <mat-form-field *ngIf="!currentFilter.value">
+            <input matInput [(ngModel)]="startDateTimeTempVariable" style="border:none;"
+              [ngxMatDatetimePicker]="Strtpicker" placeholder="MM/DD/YYYY HH:MM" [disabled]="false">
+            <mat-datepicker-toggle style="color:black" matSuffix [for]="$any(Strtpicker)"></mat-datepicker-toggle>
+            <ngx-mat-datetime-picker #Strtpicker [showSpinners]="true" [showSeconds]="false" [stepHour]="1"
+              [stepMinute]="1" [stepSecond]="1" [touchUi]="false" size="cover" [enableMeridian]="false"
+              (closed)="setStartDateValueInCurrentFilter()">
+              <ng-template>
+                <span>OK</span>
+              </ng-template>
+            </ngx-mat-datetime-picker>
+          </mat-form-field>
+          <div *ngIf="currentFilter.value" class="cursor-pointer"
+            style="display: flex;justify-content: space-between;width: 100%;">
+            <ion-label>{{currentFilter.value.toLocaleString()}}</ion-label>
+            <ion-icon name="close-outline"
+              (click)="currentFilter.value = ''; startDateTimeTempVariable = '' "></ion-icon>
+          </div>
+        </ion-item>
+        <!-- DATETIME BETWEEN -> TWO values -->
+        <ion-row class="ion-no-padding bwtn-layer"
+          *ngIf="(currentFilter.type == 'DATETIME' && currentFilter.cond == 'bwt') && currentFilter.cond !='null' &&  currentFilter.cond !='notnull'">
+          <ion-col class="ion-no-padding" size="12">
+            <p>Start date</p>
+            <ion-item lines="none" fill="outline">
+              <mat-form-field *ngIf="!currentFilter.value">
+                <input matInput style="border:none;" [(ngModel)]="startDateTimeTempVariable"
+                  [ngxMatDatetimePicker]="Startpicker" placeholder="MM/DD/YYYY HH:MM" [disabled]="false">
+                <mat-datepicker-toggle style="color:black" matSuffix [for]="$any(Startpicker)"></mat-datepicker-toggle>
+                <ngx-mat-datetime-picker #Startpicker [showSpinners]="true" [showSeconds]="false" [stepHour]="1"
+                  [stepMinute]="1" [stepSecond]="1" [touchUi]="false" size="cover" [enableMeridian]="false"
+                  (closed)="setStartDateValueInCurrentFilter()">
+                  <ng-template>
+                    <span>OK</span>
+                  </ng-template>
+                </ngx-mat-datetime-picker>
+              </mat-form-field>
+              <div *ngIf="currentFilter.value" class="cursor-pointer"
+                style="display: flex;justify-content: space-between;width: 100%;">
+                <ion-label>{{currentFilter.value.toLocaleString()}}</ion-label>
+                <ion-icon name="close-outline"
+                  (click)="currentFilter.value = ''; startDateTimeTempVariable = '' "></ion-icon>
+              </div>
+            </ion-item>
+          </ion-col>
+          <ion-col class="ion-no-padding" size="12">
+            <p>End date</p>
+            <ion-item lines="none" fill="outline">
+              <mat-form-field *ngIf="!currentFilter.value2">
+                <input matInput [(ngModel)]="endDateTimeTempVariable" style="border:none;"
+                  (ngModelChange)="endDateTimeAdjustTime()" [ngxMatDatetimePicker]="Endpicker"
+                  placeholder="MM/DD/YYYY HH:MM" [disabled]="false">
+                <mat-datepicker-toggle style="color:black" matSuffix [for]="$any(Endpicker)"></mat-datepicker-toggle>
+                <ngx-mat-datetime-picker #Endpicker [showSpinners]="true" [showSeconds]="false" [stepHour]="1"
+                  [stepMinute]="1" [stepSecond]="1" [touchUi]="false" size="cover" [enableMeridian]="false"
+                  (closed)="setEndDateValueInCurrentFilter()">
+                  <ng-template>
+                    <span>OK</span>
+                  </ng-template>
+                </ngx-mat-datetime-picker>
+              </mat-form-field>
+              <div *ngIf="currentFilter.value2" class="cursor-pointer"
+                style="display: flex;justify-content: space-between;width: 100%;">
+                <ion-label>{{currentFilter.value2.toLocaleString()}}</ion-label>
+                <ion-icon name="close-outline"
+                  (click)="currentFilter.value2 = ''; endDateTimeTempVariable = '' "></ion-icon>
+              </div>
+            </ion-item>
+          </ion-col>
+        </ion-row>
+      </div>
+    </ion-content>
+    <ion-footer class="filterFooter">
+      <ion-toolbar>
+        <ion-buttons class="ion-float-right">
+          <ion-button (click)="resetFilter()">
+            <ion-label class="textCapitalize">Clear</ion-label>
+          </ion-button>
+          <ion-button (click)="applyFilter()">
+            <ion-label class="textCapitalize">Filter</ion-label>
+          </ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-footer>
+  </ng-template>
+</ion-popover>
+
+<ion-popover #headerPopover side="left" class="reset-column-config" [isOpen]="isColumnConfigPopoverOpen"
+  (didDismiss)="isColumnConfigPopoverOpen = false">
+  <ng-template>
+    <ion-item class="cursor-pointer" lines="full" (click)="resetAllFilter()">
+      <ion-img src="../../assets/icons/filter-off-line.svg"></ion-img>
+      <ion-label>Reset Filter</ion-label>
+    </ion-item>
+    <ion-item class="cursor-pointer" (click)="columnConfig()">
+      <ion-img src="../../assets/icons/settings.svg"></ion-img>
+      <ion-label class="cursor-pointer">Column Configuration</ion-label>
+    </ion-item>
+  </ng-template>
+</ion-popover>
+
+<ion-modal [isOpen]="isColumnConfigModalOpen" (didDismiss)="isColumnConfigModalOpen = false"
+  class="column-configuration-modal">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar>
+        <ion-label>
+          Column Configuration
+        </ion-label>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content>
+      <section>
+        <div class="ng-repeat" *ngFor="let item of displayedColumns" style="">
+          <div>
+            <ion-label>{{ item }}</ion-label>
+          </div>
+          <div>
+            <ion-toggle [checked]="true" mode="ios"></ion-toggle><br /><br />
+          </div>
+        </div>
+      </section>
+    </ion-content>
+    <ion-footer>
+      <ion-toolbar>
+        <div>
+          <ion-button>
+            <ion-label style="text-transform: none;" (click)="modalController.dismiss()">Cancel</ion-label>
+          </ion-button>
+          <ion-button color="primary-color">
+            <ion-label style="text-transform: none;">Save</ion-label>
+          </ion-button>
+        </div>
+      </ion-toolbar>
+    </ion-footer>
+  </ng-template>
+</ion-modal>

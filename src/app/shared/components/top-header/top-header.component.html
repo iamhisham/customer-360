@@ -1,0 +1,264 @@
+<div>
+  <ion-header class="ion-no-border">
+    <ion-toolbar [color]="commonService.themeName == 'dot-mobile' ? 'primary-color' : 'tertiary-color'">
+      <div class="logo-search-profile-container">
+        <ion-row style="width: 100%">
+          <!--Header left side-->
+          <ion-col size="3">
+            <div class="header-logo ion-float-left">
+              <ion-img *ngIf="commonService.themeName == 'dot-mobile'" src="../../assets/icon/logo.svg"
+                class="mainLogo"></ion-img>
+              <div style="display: flex" *ngIf="commonService.themeName == 'web-3'">
+                <ion-img src="../../assets/icon/web3.png" class="mainLogo"></ion-img>
+                <ion-img src="../../assets/icon/web3T.png" class="mainLogo"></ion-img>
+              </div>
+            </div>
+          </ion-col>
+          <!-- searchbar center side -->
+          <ion-col size="9" style="display: flex; justify-content: space-between;">
+            <div class="centre-searchbar-container">
+              <div class="backdrop-overlay-header" *ngIf="this.commonService.showCustomerSearchPopover"
+                (click)="resetPopover()">
+              </div>
+              <form class="search-container"
+                [ngStyle]="commonService.themeName == 'web-3' ? {'border': '1px solid black'} : {}">
+                <div>
+                  <ion-icon name="search-outline"
+                    [ngStyle]="commonService.themeName == 'dot-mobile' ? {'color': 'white'} : {'color': 'black'}"></ion-icon>
+                </div>
+                <!-- Suggestion chip  -->
+                <div class="custom-chip" *ngIf="customerSearchedDetails.type">
+                  <p>{{customerSearchedDetails.type}}
+                    <span><ion-icon name="close" (click)="removeSearchType('TYPE');"></ion-icon></span>
+                  </p>
+                </div>
+                <!-- External source chip  -->
+                <div class="custom-chip" *ngIf="this.customerSearchedDetails.externalSourceSystemName">
+                  <p>{{this.customerSearchedDetails.externalSourceSystemName}}
+                    <span><ion-icon name="close"
+                        (click)="removeSearchType('EXTERNAL_SOURCE_SYSTEM_NAME');"></ion-icon></span>
+                  </p>
+                </div>
+                <div class="lineView">
+                  <p>&nbsp;</p>
+                </div>
+                <input style="color: var(--input-txt-color);" type="text" #searchInput class="search-bar"
+                  (keydown.enter)="triggerSearchOnEnter()" (focus)="showSearchPopover()" autocomplete="off"
+                  autocorrect="off" name="searchbar" [(ngModel)]="customerSearchedDetails.search"
+                  (ngModelChange)="searchCustomer()" placeholder="Search by name or mobile number">
+                <div>
+                  <ion-icon class="close-search" *ngIf="customerSearchedDetails.search" (click)="resetPopover()"
+                    name="close-outline"></ion-icon>
+                </div>
+                <div class="submit-when-type-container"
+                  *ngIf="customerSearchedDetails.type && customerSearchedDetails.search?.length > 0 && !customerSearchedDetails.isSeachInprogress && !customerSearchedDetails.customers">
+                  <ion-button
+                    [ngClass]="{'web-3-btn': commonService.themeName === 'web-3','dot-mob-btn': commonService.themeName === 'dot-mobile'}"
+                    (click)="searchCustomer(true)">
+                    <ion-label class="textCapitalize">Search</ion-label>
+                  </ion-button>
+                </div>
+              </form>
+            </div>
+
+            <div class="profile-container ion-float-right">
+              <div class="notifi-bell">
+                <ion-img *ngIf="commonService.themeName == 'dot-mobile'" src="../assets/icon/toolbar-notifcation.svg" />
+                <ion-img *ngIf="commonService.themeName == 'web-3'"
+                  src="../../assets/icon/toolbar-notifcation-web3.svg" />
+              </div>
+              <div class="user-profile">
+                <div class="user-logo">
+                  <ion-avatar>
+
+                    <div>
+                      <ion-label>{{ userNameLogo | uppercase }}</ion-label>
+                    </div>
+                  </ion-avatar>
+                </div>
+                <div class="user-name">
+                  <ion-label
+                    [ngStyle]="commonService.themeName == 'dot-mobile' ? {'color': 'white'} : {'color': 'black'}"
+                    style="font-family: 'Roboto-Medium';">{{userName}}</ion-label>
+                </div>
+                <div class="user-label">
+                  <ion-img *ngIf="commonService.themeName == 'dot-mobile'" class="log-out-img" id="click-trigger"
+                    src="../assets/icon/down-arrow-custom.svg"></ion-img>
+                  <ion-img *ngIf="commonService.themeName == 'web-3'" class="log-out-img" id="click-trigger"
+                    src="../../assets/icon/down-arrow-custom-web3.svg"></ion-img>
+                  <ion-popover trigger="click-trigger" side="left" alignment="start">
+                    <ng-template>
+                      <ion-item class="cursor-pointer " (click)="onUserChange('logout')">
+                        <ion-label>
+                          <ion-icon name="log-out-outline"></ion-icon>
+                          Log out
+                        </ion-label>
+                      </ion-item>
+                    </ng-template>
+                  </ion-popover>
+                </div>
+              </div>
+            </div>
+          </ion-col>
+        </ion-row>
+      </div>
+    </ion-toolbar>
+  </ion-header>
+</div>
+
+<!-- searchbar custom popover -->
+<ng-template [ngTemplateOutlet]="search_suggestion_popover"></ng-template>
+<!-- search suggestion container -->
+<ng-template #search_suggestion_popover>
+  <div *ngIf="this.commonService.showCustomerSearchPopover" class="search_overall-container" (click)="resetPopover()">
+    <div class="backdrop-overlay-content">
+    </div>
+    <div class="search-align-center">
+      <ion-row class="ion-no-padding">
+        <ion-col offset="3" size="9">
+          <div>
+            <section class="search-suggestion-popover" (click)="$event.stopPropagation()">
+
+              <div class="ion-no-padding search-suggestion-container">
+                <div class="padding-space">
+
+                  <!-- suggestion filters -->
+                  <section *ngIf="!customerSearchedDetails.search && !customerSearchedDetails.type"
+                    class="suggestion-content">
+
+                    <div class="header">
+                      <p>Suggested Filters</p>
+                      <hr>
+                    </div>
+                    <div *ngFor="let obj of suggestionList" class="content-wrapper" name="default_sugestion"
+                      (click)="selectSuggestion(obj, 'TYPE')">
+                      <div class="split" [ngClass]="obj.example ">
+                        <!-- <ion-chip>{{obj.label}}</ion-chip> -->
+                        <ion-icon [name]="obj.iconName" [title]="obj.label"></ion-icon>
+                        <p>{{obj.value}}</p>
+                      </div>
+                      <p>Ex: {{obj.example}}</p>
+                    </div>
+                  </section>
+
+                  <!-- Search Placeholder -->
+                  <section
+                    *ngIf="customerSearchedDetails.type && !customerSearchedDetails.search && customerSearchedDetails.placeholder"
+                    class="suggestion-content">
+                    <p class="header">
+                      <span class="text"
+                        *ngIf="!customerSearchedDetails.externalSourceSystemName">{{customerSearchedDetails.placeholder}}
+                      </span>
+                      <span class="text"
+                        *ngIf="(customerSearchedDetails.type == 'customer_id' || customerSearchedDetails.type == 'order_Id' || this.customerSearchedDetails.type == 'subscription_Id') && !this.customerSearchedDetails.externalSourceSystemName">
+                        ( Or ) Select Source system</span>
+                      <!-- <span class="text"
+                        *ngIf="(customerSearchedDetails.type == 'customer_id' || customerSearchedDetails.type == 'order_Id' || this.customerSearchedDetails.type == 'subscription_Id') && !this.customerSearchedDetails.externalSourceSystemName">
+                        ( Or ) Select External source system</span> -->
+                      <span class="text" *ngIf="customerSearchedDetails.externalSourceSystemName">Please
+                        enter
+                        External {{customerSearchedDetails.type}} for the system
+                        {{customerSearchedDetails.externalSourceSystemName}}</span>
+                    </p>
+                    <!-- this.customerSearchedDetails.type == 'customer_id' -->
+                    <div class="external-system-list-container"
+                      *ngIf="!customerSearchedDetails.externalSourceSystemName && (customerSearchedDetails.type == 'customer_id' || this.customerSearchedDetails.type == 'order_Id' || this.customerSearchedDetails.type == 'subscription_Id')">
+                      <div class="header">
+                        <p>Extenal source system</p>
+                        <hr>
+                      </div>
+                      <div *ngFor="let list of externalSourceSystemList" class="content-wrapper"
+                        name="external-source-suggestion"
+                        (click)="selectSuggestion(list,'EXTERNAL_SOURCE_SYSTEM_NAME')">
+                        <div class="split space-content">
+                          <div style="display: flex;">
+                            <ion-img style="width: 16px;height: 16px;" src="../../assets/icons/desktopImg.png" />
+                            <p style="padding-inline-start: 8px;">{{list.name}}</p>
+                          </div>
+                          <p class="overflow-text">{{list.description}}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </section>
+
+                  <!-- Before Search Result -->
+                  <section *ngIf="customerSearchedDetails.isSeachInprogress" class="suggestion-content">
+                    <div class="header">
+                      <p> Searching for <b>{{customerSearchedDetails.type}}</b>
+                        {{customerSearchedDetails.search}}
+                        {{customerSearchedDetails.externalSourceSystemName ? 'for the system ' +
+                        customerSearchedDetails.externalSourceSystemName : ''}}</p>
+                    </div>
+                  </section>
+
+                  <!-- Before Search Result -->
+                  <section *ngIf="customerSearchedDetails.search" class="suggestion-content">
+                    <div class="header"
+                      *ngIf="!customerSearchedDetails.type && customerSearchedDetails.search?.length < 3">
+                      <p>Please provide input with a minimum length of 3 characters.</p>
+                    </div>
+                    <div class="header"
+                      *ngIf="customerSearchedDetails.type && !customerSearchedDetails.customers && !customerSearchedDetails.isSeachInprogress">
+                      <p>Please click 'Search' button (or) Press enter button to search the customer</p>
+                    </div>
+                  </section>
+
+                  <!-- Search Result -->
+                  <section *ngIf="(customerSearchedDetails.customers && !customerSearchedDetails.isSeachInprogress)"
+                    class="suggestion-content">
+                    <div class="header">
+                      <p>Search Result</p>
+                      <hr>
+                    </div>
+                    <div class="user-detals-container">
+                      <div class="customer-container">
+                        <p>Customers</p>
+                        <div class="details" *ngFor="let customer of customerSearchedDetails.customers?.slice(0, 5)"
+                          (click)="selectCustomer(customer)" name="customer_result_sugestion">
+                          <p class="left-aligned-text"> <ion-icon class="customer-icons"
+                              name="person-outline"></ion-icon><span>{{customer.id}}</span>&nbsp;{{customer.name}}
+                            <ion-chip>
+                              <ion-label class="textCapitalize">
+                                {{customer.type}}
+                              </ion-label>
+                            </ion-chip>
+                          </p>
+                          <p class="move-right">{{customer.primaryEmail}}</p>
+                        </div>
+                        <div *ngIf="customerSearchedDetails.customers.length == 0">
+                          <p style="text-align: center;">No Customer data found</p>
+                        </div>
+                        <ion-note (click)="showMoreSearchResults('CUSTOMER')" class="expand"
+                          *ngIf="5 <= customerSearchedDetails.customerRecords">Expand all</ion-note>
+                      </div>
+                      <hr>
+                      <div class="customer-container">
+                        <p>Accounts</p>
+                        <div class="details"
+                          *ngFor="let account of customerSearchedDetails.accounts.slice(0, 5);let i = index"
+                          name="account_result_suggestion" (click)="selectAccount(account)">
+                          <p class="left-aligned-text"><ion-icon class="customer-icons"
+                              name="people-outline"></ion-icon>
+                            <span>{{account.id}}</span>&nbsp;{{account.nickName}},
+                            {{account.accountNumber}}
+                            <ion-chip>Customer: {{account.customerId}}</ion-chip>
+                          </p>
+                          <p class="move-right">{{account.brandName}}</p>
+                        </div>
+                        <div *ngIf="customerSearchedDetails.accounts.length == 0">
+                          <p style="text-align: center;">No Account data found</p>
+                        </div>
+                        <ion-note class="expand" (click)="showMoreSearchResults('ACCOUNT')"
+                          *ngIf="5 <= customerSearchedDetails.accountRecords">Expand all</ion-note>
+                      </div>
+                    </div>
+                  </section>
+                </div>
+              </div>
+            </section>
+          </div>
+        </ion-col>
+      </ion-row>
+    </div>
+  </div>
+</ng-template>

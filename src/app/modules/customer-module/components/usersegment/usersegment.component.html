@@ -1,0 +1,79 @@
+<ion-content>
+  <ion-grid class="userSegment-grid-container">
+    <ion-row>
+      <ion-col size="6" class="ion-no-padding table-header">
+        <ion-label>Segments</ion-label>
+      </ion-col>
+      <ion-col size="6" class="ion-no-padding ">
+        <div class="top-layer-btns">
+          <ion-button (click)="openRecommedationView()" class="no-text-select recommend_btn ion-text-capitalize">
+            <ion-label>Recommendation</ion-label>
+          </ion-button>
+          <ion-button routerLink="/customers/segments/create" expand="block" class="ion-text-capitalize">
+            <ion-label>Create Segment</ion-label>
+          </ion-button>
+        </div>
+      </ion-col>
+      <ion-col size="12" class="ion-no-padding M-24">
+        <app-table #userSegment_grid [tableDetails]="userTableDetails"></app-table>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>
+
+<ion-modal [isOpen]="isRecommendedView" class="recommendViewModal" #modal (willDismiss)="isRecommendedView = false"
+  [enterAnimation]="enterAnimation" [leaveAnimation]="leaveAnimation">
+  <ng-template>
+    <div class="recmmd-wrapper">
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>Recommendation</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="modal.dismiss()">Close</ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="recommendation-content">
+        <ion-list *ngIf="recommendationList?.length != 0">
+          <ion-item style="--inner-padding-end: 0; --padding-start: 0;" *ngFor="let list of recommendationList"
+            (click)="recommendationView(list.name, list.description)">
+            <div class="custom-chip ion-activatable rounded-rectangle">
+              <h3>{{list.name}}</h3>
+              <p class="two-lines">
+                {{list.description}}
+              </p>
+              <ion-ripple-effect></ion-ripple-effect>
+            </div>
+
+          </ion-item>
+          <!-- <ion-item style="--inner-padding-end: 0; --padding-start: 0;">
+            <div class="inner-container">
+              <div class="custom-chip ion-activatable ripple-parent rounded-rectangle" (click)="recommendationView()">
+                <h3>Programming</h3>
+                <p class="two-lines">
+                  Lorem ipsum dolor sit amet consectetur adipisicing elit. Molestiae
+                </p>
+                <ion-ripple-effect></ion-ripple-effect>
+              </div>
+            </div>
+          </ion-item> -->
+        </ion-list>
+        <ion-list class="customer-account-data-section none-data-account" *ngIf="recommendationList == null">
+          <!-- <div class="main-none-container" [hidden]="recommendationList === null">
+            <div class="sub-container-none">
+              Loading ...
+            </div>
+          </div> -->
+          <!-- <div class="loader" *ngIf="recommendationList === null"> -->
+          <ion-spinner [hidden]="recommendationList == null" name="circular"></ion-spinner>
+          <!-- </div> -->
+          <!-- <div class="main-none-container" [hidden]="recommendationList !== null && recommendationList.length == 0">
+            <div class="sub-container-none">
+              No Recommendation available
+            </div>
+          </div> -->
+        </ion-list>
+      </ion-content>
+    </div>
+  </ng-template>
+</ion-modal>

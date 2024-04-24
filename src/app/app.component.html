@@ -1,0 +1,75 @@
+<div *ngIf="urlList.indexOf(router.url.split('?')[0]) == -1">
+  <ion-app>
+    <!-- header -->
+    <app-top-header></app-top-header>
+    <!--Sidebar / Navbar-->
+    <ion-content>
+      <ion-split-pane when="md" contentId="menu-content">
+        <ion-menu [ngClass]="{ collapse: isMenuCollapse }" contentId="menu-content">
+          <ion-content class="sidebar-container" color="primary-menu-color" style="--overflow: hidden;">
+            <div class="customScroller" style="height: calc(100vh - 65px); overflow: auto;">
+            <ion-menu-toggle autoHide="false">
+              <ng-container *ngFor="let item of menuList">
+                <ion-item *ngIf="!item.isAccordian" lines="none" [routerLink]="item.link" [title]="item.title"
+                  routerDirection="root" routerLinkActive="active-link" button="true" class="defaultSideTabView">
+                  <ion-img class="pointer-none" [ngClass]="{'ion-hide':isActiveIcon(item.link)}"
+                    [src]="item.src_outline"></ion-img>
+                  <div>
+                    <ion-img class="pointer-none" [ngClass]="{'ion-hide':!isActiveIcon(item.link)}"
+                      [src]="item.src_filled"></ion-img>
+                  </div>
+                  <ion-label class="sideLabelView" [title]="item.title">
+                    {{ item.title }}
+                  </ion-label>
+                </ion-item>
+              </ng-container>
+
+              <ion-accordion-group class="notification-center-accordion-grp" [value]="expandSelectedMenu">
+                <ng-container *ngFor="let menuItem of menuList">
+                  <ng-container *ngIf="menuItem.isAccordian">
+                    <ion-accordion [value]="menuItem.title">
+                      <ion-item routerLinkActive="active-link" slot="header" color="light" button="true" lines="none"
+                        (click)="toggleAccordion(menuItem.title)">
+                        <ion-label>{{ menuItem.title }}</ion-label>
+                        <ion-img slot="start" style="margin-right: 14px;" [src]="menuItem.src_outline"></ion-img>
+                      </ion-item>
+
+                      <!-- child repeat -->
+                      <ng-container *ngFor="let childItem of menuItem.children">
+                        <div slot="content" *ngIf="menuItem.isAccordian">
+                          <ion-item routerLinkActive="active-link" lines="none" [routerLink]="childItem.link"
+                            routerDirection="root" button="true"
+                            style="background: var(--ion-color-primary-menu-color);">
+                            <div style="display: flex; justify-content: center; 
+                            align-items: center; margin-left: 28px;">
+                              <ion-img [src]="childItem.iconWhiteColor"
+                                [ngClass]="{'ion-hide':isActiveIcon(childItem.link)}"
+                                style="margin-right: 12px;"></ion-img>
+                              <ion-img [src]="childItem.iconPrimaryColor"
+                                [ngClass]="{'ion-hide':!isActiveIcon(childItem.link)}"
+                                style="margin-right: 12px;"></ion-img>
+                              <ion-label>{{ childItem.title }}</ion-label>
+                            </div>
+                          </ion-item>
+                        </div>
+                      </ng-container>
+
+                    </ion-accordion>
+                  </ng-container>
+                </ng-container>
+              </ion-accordion-group>
+
+            </ion-menu-toggle>
+          </div>
+          </ion-content>
+        </ion-menu>
+        <ion-router-outlet id="menu-content"></ion-router-outlet>
+      </ion-split-pane>
+    </ion-content>
+  </ion-app>
+</div>
+<div *ngIf="urlList.indexOf(router.url.split('?')[0]) != -1">
+  <ion-app>
+    <ion-router-outlet id="menu-content"></ion-router-outlet>
+  </ion-app>
+</div>

@@ -1,0 +1,5 @@
+<ion-content>
+  <app-source-system-mapping [schedulerEditId]="schedulerEditId" [sourceSystemList]="sourceSystemList"
+    [payloadList]="payloadList" [schedulerPage]="true" [hidden]="true" #sourceMapping></app-source-system-mapping>
+  <ng-container *ngTemplateOutlet="sourceMapping.schedularComponentCreate"></ng-container>
+</ion-content>

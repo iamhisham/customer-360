@@ -1,0 +1,155 @@
+<ion-content style="--padding-start: 40px; --padding-end: 40px;">
+    <ion-grid class="ion-no-padding">
+        <ion-row
+            style="display: flex; justify-content: center; align-items: center; margin: 30px 0px 16px 0px; height: 42px;">
+            <ion-col style="    display: flex;
+            justify-content: space-between;">
+                <h1 style="font-family: 'roboto-medium'; font-size: 20px; color: black">Recently Viewed</h1>
+                <h4 *ngIf="userlist && userlist.length != 0" style="font-family: 'roboto-medium'; font-size: 16px; float: right; color: black">Customer Count: {{totalRecords}}</h4>
+            </ion-col>
+        </ion-row>
+
+
+        <ion-row class="ion-no-padding">
+            <ion-col class="ion-no-padding" *ngIf="userlist != null"
+                style="display: grid; gap: 24px; grid-template-columns: auto auto auto auto; justify-content: start;">
+                <ion-card class="ion-padding ion-no-margin" *ngFor="let list of userlist">
+                    <ion-row class="ion-no-padding">
+                        <ion-col size="12" class="user-logo">
+                            <ion-avatar>
+                                <!-- <ion-img src="../../assets/icon/favicon.png" /> -->
+                                <div>
+                                    <ion-label>{{ list.userNameLogo | uppercase }}</ion-label>
+                                </div>
+                            </ion-avatar>
+                        </ion-col>
+                        <!-- <ion-col size="6" class="view-chip">
+                            <ion-chip outline="false" (click)="routeToRecentView(list.customerId)"
+                                class="ion-float-right">view</ion-chip>
+                        </ion-col> -->
+                        <ion-col size="12" class="name-wrapper">
+                            <ion-label (click)="routeToRecentView(list.customerId)">
+                                {{list.customerName}}
+                            </ion-label>
+                        </ion-col>
+                        <ion-col size="12" class="viewat-wrapper">
+                            <ion-label><span style="font-family: 'roboto-medium';">Viewed At :</span>
+                                {{this.datePipe.transform(list.viewedAt,this.commonService.date_time_format_with_sec)}}​</ion-label>
+                        </ion-col>
+                    </ion-row>
+                </ion-card>
+            </ion-col>
+            <ion-col size="12" *ngIf="userlist == null" class="none-data-account ion-no-padding">
+                <div class="main-none-container">
+                    <div class="sub-container-none">
+                        No Recent View Found</div>
+                </div>
+            </ion-col>
+            <ion-col *ngIf="hasMoreRecord && userlist.length " size="12" class="view-chip-footer"
+                style="display: flex; justify-content: center; margin-top: 26px;">
+                <ion-chip (click)="showMore()" class="footer-chip text-align-center">View More</ion-chip>
+            </ion-col>
+
+            <!-- <ion-col class="ion-no-padding">
+                <ion-card class="ion-padding ion-no-margin">
+                    <ion-row class="ion-no-padding">
+                        <ion-col size="6" class="user-logo">
+                            <ion-avatar>
+                                <ion-img src="../../assets/icon/favicon.png" />
+                            </ion-avatar>
+                        </ion-col>
+                        <ion-col size="6" class="view-chip">
+                            <ion-chip outline="false" class="ion-float-right">view</ion-chip>
+                        </ion-col>
+                        <ion-col size="12" class="name-wrapper">
+                            <ion-label>Slock</ion-label>
+                        </ion-col>
+                        <ion-col size="12" class="viewat-wrapper">
+                            <ion-label>Viewed At: 123</ion-label>
+                        </ion-col>
+                    </ion-row>
+                </ion-card>
+            </ion-col>
+            <ion-col class="ion-no-padding">
+                <ion-card class="ion-padding ion-no-margin">
+                    <ion-row class="ion-no-padding">
+                        <ion-col size="6" class="user-logo">
+                            <ion-avatar>
+                                <ion-img src="../../assets/icon/favicon.png" />
+                            </ion-avatar>
+                        </ion-col>
+                        <ion-col size="6" class="view-chip">
+                            <ion-chip outline="false" class="ion-float-right">view</ion-chip>
+                        </ion-col>
+                        <ion-col size="12" class="name-wrapper">
+                            <ion-label>Slock</ion-label>
+                        </ion-col>
+                        <ion-col size="12" class="viewat-wrapper">
+                            <ion-label>Viewed At: 123</ion-label>
+                        </ion-col>
+                    </ion-row>
+                </ion-card>
+            </ion-col>
+            <ion-col class="ion-no-padding">
+                <ion-card class="ion-padding ion-no-margin">
+                    <ion-row class="ion-no-padding">
+                        <ion-col size="6" class="user-logo">
+                            <ion-avatar>
+                                <ion-img src="../../assets/icon/favicon.png" />
+                            </ion-avatar>
+                        </ion-col>
+                        <ion-col size="6" class="view-chip">
+                            <ion-chip outline="false" class="ion-float-right">view</ion-chip>
+                        </ion-col>
+                        <ion-col size="12" class="name-wrapper">
+                            <ion-label>Slock</ion-label>
+                        </ion-col>
+                        <ion-col size="12" class="viewat-wrapper">
+                            <ion-label>Viewed At: 123</ion-label>
+                        </ion-col>
+                    </ion-row>
+                </ion-card>
+            </ion-col>
+            <ion-col class="ion-no-padding">
+                <ion-card class="ion-padding ion-no-margin">
+                    <ion-row class="ion-no-padding">
+                        <ion-col size="6" class="user-logo">
+                            <ion-avatar>
+                                <ion-img src="../../assets/icon/favicon.png" />
+                            </ion-avatar>
+                        </ion-col>
+                        <ion-col size="6" class="view-chip">
+                            <ion-chip outline="false" class="ion-float-right">view</ion-chip>
+                        </ion-col>
+                        <ion-col size="12" class="name-wrapper">
+                            <ion-label>Slock</ion-label>
+                        </ion-col>
+                        <ion-col size="12" class="viewat-wrapper">
+                            <ion-label>Viewed At: 123</ion-label>
+                        </ion-col>
+                    </ion-row>
+                </ion-card>
+            </ion-col>
+            <ion-col class="ion-no-padding">
+                <ion-card class="ion-padding ion-no-margin">
+                    <ion-row class="ion-no-padding">
+                        <ion-col size="6" class="user-logo">
+                            <ion-avatar>
+                                <ion-img src="../../assets/icon/favicon.png" />
+                            </ion-avatar>
+                        </ion-col>
+                        <ion-col size="6" class="view-chip">
+                            <ion-chip outline="false" class="ion-float-right">view</ion-chip>
+                        </ion-col>
+                        <ion-col size="12" class="name-wrapper">
+                            <ion-label>Slock</ion-label>
+                        </ion-col>
+                        <ion-col size="12" class="viewat-wrapper">
+                            <ion-label>Viewed At: 123</ion-label>
+                        </ion-col>
+                    </ion-row>
+                </ion-card>
+            </ion-col> -->
+        </ion-row>
+    </ion-grid>
+</ion-content>

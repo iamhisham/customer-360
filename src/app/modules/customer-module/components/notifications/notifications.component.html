@@ -1,0 +1,503 @@
+<section class="whole-content-wrapper">
+  <ion-grid class="ion-no-padding">
+    <ion-row>
+      <ion-col>
+        <ion-label class="common-header">Notification</ion-label>
+      </ion-col>
+    </ion-row>
+    <ion-row>
+      <!-- left container -->
+      <ion-col size="8" class="notification-layout">
+        <ion-row class="magrin-t-b">
+          <ion-col style="display: flex;
+          justify-content: space-between;">
+            <ion-chip id="filter" class="filter" [outline]="true">
+              <ion-icon name="funnel-outline"></ion-icon>
+              <ion-label>Filter</ion-label>
+              <ion-badge
+                *ngIf="((selectedItems.length !== 0) && (selectedItems.length !== 5))">{{selectedItems.length}}</ion-badge>
+            </ion-chip>
+            <div class="toggle-button">
+              <ion-toggle mode="ios" [(ngModel)]="notificationHistoryType"
+                (ionChange)="getNotificationHistory()"></ion-toggle>
+              <ion-label>Compile Conversation</ion-label>
+            </div>
+            <ion-popover class="filter-popover-style" trigger="filter" side="bottom" alignment="end">
+              <ng-template>
+                <ion-item class="cursor-pointer" (click)="onItemClicked('EMAIL')">
+                  <div>
+                    <ion-checkbox [checked]="isSelected('EMAIL')"></ion-checkbox><ion-icon title="EMAIL"
+                      name="mail-outline" class="icon email"></ion-icon><ion-label>Email</ion-label>
+                  </div>
+                </ion-item>
+                <ion-item (click)="onItemClicked('SMS')">
+                  <div>
+                    <ion-checkbox [checked]="isSelected('SMS')"></ion-checkbox><ion-icon title="SMS"
+                      name="chatbox-outline" class="icon sms"></ion-icon><ion-label>SMS</ion-label>
+                  </div>
+                </ion-item>
+                <ion-item (click)="onItemClicked('WEB_PUSH')">
+                  <div>
+                    <ion-checkbox [checked]="isSelected('WEB_PUSH')"></ion-checkbox> <ion-icon title="WEB PUSH"
+                      name="desktop-outline" class="icon webpush"></ion-icon><ion-label>Web push</ion-label>
+                  </div>
+                </ion-item>
+                <ion-item (click)="onItemClicked('MOBILE_PUSH')">
+                  <div>
+                    <ion-checkbox [checked]="isSelected('MOBILE_PUSH')"></ion-checkbox><ion-icon title="MOBILE PUSH"
+                      name="phone-portrait-outline" class="icon mobilepush"></ion-icon><ion-label>Mobile
+                      push</ion-label>
+                  </div>
+                </ion-item>
+                <ion-item (click)="onItemClicked('CALL')">
+                  <div>
+                    <ion-checkbox [checked]="isSelected('CALL')"></ion-checkbox><ion-icon title="CALL"
+                      name="call-outline" class="icon mobilepush"></ion-icon><ion-label>Call</ion-label>
+                  </div>
+                </ion-item>
+              </ng-template>
+            </ion-popover>
+          </ion-col>
+        </ion-row>
+        <ion-row>
+          <!-- work -->
+          <ion-col size="12" *ngIf="notificationHistory" class="notification-history-grid-layout">
+            <ng-container *ngFor="let data of notificationHistory?.data; let i = index;">
+              <div class="outer-wrapper-container"
+                [ngClass]="{'remove-padding-top': i === 0, 'remove-padding-bottom': i === notificationHistory.length - 1}">
+                <div class="inner-wrapper-container">
+                  <div class="icon-card-distance" [ngClass]="{'box-shadow': i === 0}">
+                    <ion-icon title="EMAIL" *ngIf="data.channel === 'EMAIL'" name="mail-outline"
+                      class="icon email"></ion-icon>
+                    <ion-icon title="SMS" *ngIf="data.channel === 'SMS'" name="chatbox-outline"
+                      class="icon sms"></ion-icon>
+                    <ion-icon title="WEB PUSH" *ngIf="data.channel === 'WEB_PUSH'" name="desktop-outline"
+                      class="icon webpush"></ion-icon>
+                    <ion-icon title="CALL" *ngIf="data.channel === 'CALL'" name="call-outline"
+                      class="icon mobilepush"></ion-icon>
+                    <ion-icon title="MOBILE PUSH" *ngIf="data.channel === 'MOBILE_PUSH'" name="phone-portrait-outline"
+                      class="icon mobilepush"></ion-icon>
+                  </div>
+                  <div class="second-div" [ngClass]="{'box-shadow': i === notificationHistory.length - 1}"></div>
+                </div>
+                <ion-card *ngIf="data.channel=='EMAIL'" class="card email-card">
+                  <ion-row>
+                    <ion-col size="12" class="P-T-0">
+                      <ion-text color="primary-text">{{ data?.content?.subject }}</ion-text>
+                    </ion-col>
+                    <ion-col size="12">
+                      <!-- incoming outgoing icons -->
+                      <div>
+                        <ion-img class="icons-style Icon-rotate" *ngIf="data.direction =='INBOUND'"
+                          src="../../../assets/icon/incomming.svg"></ion-img>
+                        <ion-img class="icons-style" *ngIf="data.direction =='OUTBOUND'"
+                          src="../../../assets/icon/outgoing.svg"></ion-img>
+                      </div>
+                      <!-- inside text content -->
+                      <div class="text-over" style="display: flex; flex-direction: column;">
+                        <ion-note color="primary-text P-I-E-8"
+                          [ngClass]="{'two-lines': isContentOverTwoLines(data?.content?.message)}">{{
+                          data?.content?.message}}
+                          <div *ngIf="isContentOverTwoLines(data?.content?.message)" class="view-more-container">
+                            <ion-label (click)="toggleViewMore(data)">View more</ion-label>
+                          </div>
+                        </ion-note>
+                        <ion-note><span class="status-date-content badge-content"
+                            *ngIf="data.direction ==='OUTBOUND'">{{data.status}}</span><span
+                            class="status-date-content date-content">
+                            {{ datePipe.transform(data.sentAt,
+                            commonService.date_time_format) }}
+                          </span></ion-note>
+                      </div>
+                    </ion-col>
+                    <ion-col size="12" *ngFor="let list of data.conversationList">
+                      <div>
+                        <ion-img class="icons-style Icon-rotate" *ngIf="list.direction =='INBOUND'"
+                          src="../../../assets/icon/incomming.svg"></ion-img>
+                        <ion-img class="icons-style" *ngIf="list.direction =='OUTBOUND'"
+                          src="../../../assets/icon/outgoing.svg"></ion-img>
+                      </div>
+                      <div class="O-A" style="display: flex; flex-direction: column;">
+                        <ion-note color="primary-text P-I-E-8 "
+                          [ngClass]="{'two-lines': isContentOverTwoLines(list?.content?.message)}">{{
+                          list?.content?.message }} <div *ngIf="isContentOverTwoLines(list?.content?.message)"
+                            class="view-more-container">
+                            <ion-label (click)="toggleViewMore(list)">View more</ion-label>
+                          </div></ion-note>
+                        <ion-note style="display: flex;
+                        justify-content: start;
+                        flex-direction: row-reverse;
+                        align-items: center;"><span class="status-date-content badge-content"
+                            *ngIf="list.direction ==='OUTBOUND'">{{list.status}}</span><span
+                            class="status-date-content date-content">
+                            {{ datePipe.transform(list.sentAt,
+                            commonService.date_time_format) }}
+                          </span></ion-note>
+                      </div>
+                    </ion-col>
+                  </ion-row>
+                </ion-card>
+                <ion-card *ngIf="data.channel=='SMS'" class="card sms-card">
+                  <ion-row>
+                    <ion-col size="12">
+                      <div>
+                        <ion-img class="icons-style Icon-rotate" *ngIf="data.direction =='INBOUND'"
+                          src="../../../assets/icon/incomming.svg"></ion-img>
+                        <ion-img class="icons-style" *ngIf="data.direction =='OUTBOUND'"
+                          src="../../../assets/icon/outgoing.svg"></ion-img>
+                      </div>
+                      <div class="O-A" style="display: flex; flex-direction: column;"> <ion-note color="primary-text P-I-E-8 "
+                          [ngClass]="{'two-lines-m': isContentOverTwoLines(data?.content?.message)}">
+                          <ion-note>{{data?.content?.message}}</ion-note>
+                          <div *ngIf="isContentOverTwoLines(data?.content?.message)" class="view-more-container ">
+                            <ion-label class="y-path" (click)="toggleViewMore(data)">View
+                              more</ion-label>
+                          </div>
+                        </ion-note>
+                        <ion-note style="display: flex;
+                        justify-content: start;
+                        flex-direction: row-reverse;
+                        align-items: center;"><span class="status-date-content badge-content"
+                            *ngIf="data.direction ==='OUTBOUND'">{{data.status}}</span><span
+                            class="status-date-content date-content">
+                            {{ datePipe.transform(data.sentAt,
+                            commonService.date_time_format) }}
+                          </span></ion-note>
+                      </div>
+                    </ion-col>
+                    <ion-col size="12" *ngFor="let list of data.conversationList">
+                      <div>
+                        <ion-img class="icons-style Icon-rotate" *ngIf="list.direction =='INBOUND'"
+                          src="../../../assets/icon/incomming.svg"></ion-img>
+                        <ion-img class="icons-style" *ngIf="list.direction =='OUTBOUND'"
+                          src="../../../assets/icon/outgoing.svg"></ion-img>
+                      </div>
+                      <div class="O-A" style="display: flex; flex-direction: column;">
+                        <ion-note color="primary-text P-I-E-8 "
+                          [ngClass]="{'two-lines-m': isContentOverTwoLines(list?.content?.message)}">{{
+                          list?.content?.message }} <div *ngIf="isContentOverTwoLines(list?.content?.message)"
+                            class="view-more-container">
+                            <ion-label class="y-path" (click)="toggleViewMore(list)">View
+                              more</ion-label>
+                          </div></ion-note>
+
+                        <ion-note style="display: flex;
+                        justify-content: start;
+                        flex-direction: row-reverse;
+                        align-items: center;"><span class="status-date-content badge-content"
+                            *ngIf="list.direction ==='OUTBOUND'">{{list.status}}</span><span
+                            class="status-date-content date-content">
+                            {{ datePipe.transform(list.sentAt,
+                            commonService.date_time_format) }}
+                          </span></ion-note>
+                      </div>
+
+                    </ion-col>
+                  </ion-row>
+                </ion-card>
+                <ion-card *ngIf="data.channel=='CALL'" class="card sms-card">
+                  <ion-row>
+                    <ion-col size="12">
+                      <div>
+                        <ion-img class="icons-style Icon-rotate" *ngIf="data.direction =='INBOUND'"
+                          src="../../../assets/icon/incomming.svg"></ion-img>
+                        <ion-img class="icons-style" *ngIf="data.direction =='OUTBOUND'"
+                          src="../../../assets/icon/outgoing.svg"></ion-img>
+                      </div>
+                      <div class="O-A" style="display: flex; flex-direction: column;"> <ion-note color="primary-text P-I-E-8 "
+                          [ngClass]="{'two-lines-m': isContentOverTwoLines(data?.content?.message)}">{{
+                          data?.content?.message
+                          }} <div *ngIf="isContentOverTwoLines(data?.content?.message)" class="view-more-container">
+                            <ion-label class="y-path" (click)="toggleViewMore(data)">View
+                              more</ion-label>
+                          </div></ion-note>
+                        <ion-note style="display: flex;
+                        justify-content: start;
+                        flex-direction: row-reverse;
+                        align-items: center;"><span class="status-date-content badge-content"
+                            *ngIf="data.direction ==='OUTBOUND'">{{data.status}}</span><span
+                            class="status-date-content date-content">
+                            {{ datePipe.transform(data.sentAt,
+                            commonService.date_time_format) }}
+                          </span></ion-note>
+                      </div>
+                    </ion-col>
+                    <ion-col size="12" *ngFor="let list of data.conversationList">
+                      <div>
+                        <ion-img class="icons-style Icon-rotate" *ngIf="list.direction =='INBOUND'"
+                          src="../../../assets/icon/incomming.svg"></ion-img>
+                        <ion-img class="icons-style" *ngIf="list.direction =='OUTBOUND'"
+                          src="../../../assets/icon/outgoing.svg"></ion-img>
+                      </div>
+                      <div class="O-A" style="display: flex; flex-direction: column;">
+                        <ion-note color="primary-text P-I-E-8 "
+                          [ngClass]="{'two-lines-m': isContentOverTwoLines(list?.content?.message)}">{{
+                          list?.content?.message }}<div *ngIf="isContentOverTwoLines(list?.content?.message)"
+                            class="view-more-container">
+                            <ion-label class="y-path" (click)="toggleViewMore(list)">View
+                              more</ion-label>
+                          </div></ion-note>
+
+                        <ion-note style="display: flex;
+                        justify-content: start;
+                        flex-direction: row-reverse;
+                        align-items: center;"><span class="status-date-content badge-content"
+                            *ngIf="list.direction ==='OUTBOUND'">{{list.status}}</span><span
+                            class="status-date-content date-content">
+                            {{ datePipe.transform(list.sentAt,
+                            commonService.date_time_format) }}
+                          </span></ion-note>
+                      </div>
+                    </ion-col>
+                  </ion-row>
+                </ion-card>
+                <ion-card *ngIf="data.channel=='MOBILE_PUSH'" class="card mobile-card">
+                  <ion-row>
+                    <ion-col size="12">
+                      <div style="display: flex;">
+                        <ion-img class="icons-style Icon-rotate" *ngIf="data.direction =='INBOUND'"
+                          src="../../../assets/icon/incomming.svg"></ion-img>
+                        <ion-img class="icons-style" *ngIf="data.direction =='OUTBOUND'"
+                          src="../../../assets/icon/call-outgoing.svg"></ion-img>
+                        <ion-img class="icons-style" *ngIf="data.direction =='MISSED'"
+                          src="../../../assets/icon/call-missed.svg"></ion-img>
+                      </div>
+                      <div class="O-A" style="display:flex; flex-direction: column;"> <ion-note color="primary-text P-I-E-8 "
+                          [ngClass]="{'two-lines-m': isContentOverTwoLines(data?.content?.message)}">
+                          <ion-note>{{data?.content?.message}}</ion-note>
+                          <div *ngIf="isContentOverTwoLines(data?.content?.message)" class="view-more-container">
+                            <ion-label class="y-path" (click)="toggleViewMore(data)">View
+                              more</ion-label>
+                          </div>
+                        </ion-note>
+                        <ion-note style="display: flex;
+                        justify-content: start;
+                        flex-direction: row-reverse;
+                        align-items: center;"><span class="status-date-content badge-content"
+                            *ngIf="data.direction ==='OUTBOUND'">{{data.status}}</span><span
+                            class="status-date-content date-content">
+                            {{ datePipe.transform(data.sentAt,
+                            commonService.date_time_format) }}
+                          </span></ion-note>
+                      </div>
+                    </ion-col>
+                    <ion-col size="12" *ngFor="let list of data.conversationList">
+                      <div>
+                        <ion-img class="icons-style Icon-rotate" *ngIf="list.direction =='INBOUND'"
+                          src="../../../assets/icon/incomming.svg"></ion-img>
+                        <ion-img class="icons-style" *ngIf="list.direction =='OUTBOUND'"
+                          src="../../../assets/icon/call-outgoing.svg"></ion-img>
+                        <ion-img class="icons-style" *ngIf="list.direction =='MISSED'"
+                          src="../../../assets/icon/call-missed.svg"></ion-img>
+                      </div>
+                      <div class="O-A" style="display: flex; flex-direction: column">
+                        <ion-note color="primary-text P-I-E-8 "
+                          [ngClass]="{'two-lines-m': isContentOverTwoLines(list?.content?.message)}">{{
+                          list?.content?.message }}<div *ngIf="isContentOverTwoLines(list?.content?.message)"
+                            class="view-more-container">
+                            <ion-label class="y-path" (click)="toggleViewMore(list)">View
+                              more</ion-label>
+                          </div></ion-note>
+                        <ion-note style="display: flex;
+                        justify-content: start;
+                        flex-direction: row-reverse;
+                        align-items: center;"><span class="status-date-content badge-content"
+                            *ngIf="list.direction ==='OUTBOUND'">{{list.status}}</span><span
+                            class="status-date-content date-content">
+                            {{ datePipe.transform(list.sentAt,
+                            commonService.date_time_format) }}
+                          </span></ion-note>
+                      </div>
+                    </ion-col>
+
+                  </ion-row>
+                </ion-card>
+                <ion-card *ngIf="data.channel=='WEB_PUSH'" class="card web-card">
+                  <ion-row>
+                    <ion-col size="12" class="P-T-0"><ion-label>
+                        {{data.content?.title}}
+                      </ion-label></ion-col>
+                    <ion-col size="12">
+                      <div>
+                        <ion-img class="icons-style Icon-rotate" *ngIf="data.direction =='INBOUND'"
+                          src="../../../assets/icon/incomming.svg"></ion-img>
+                        <ion-img class="icons-style" *ngIf="data.direction =='OUTBOUND'"
+                          src="../../../assets/icon/outgoing.svg"></ion-img>
+                      </div>
+                      <div class="O-A" style="display: flex; flex-direction: column"> <ion-note color="primary-text P-I-E-8 "
+                          [ngClass]="{'two-lines-m': isContentOverTwoLines(data?.content?.message)}">{{data?.content?.message}}
+                          <div *ngIf="isContentOverTwoLines(data?.content?.message)" class="view-more-container">
+                            <ion-label class="y-path" (click)="toggleViewMore(data)">View
+                              more</ion-label>
+                          </div>
+                        </ion-note>
+
+                        <ion-note style="display: flex;
+                        justify-content: start;
+                        flex-direction: row-reverse;
+                        align-items: center;"><span class="status-date-content badge-content"
+                            *ngIf="data.direction ==='OUTBOUND'">{{data.status}}</span><span
+                            class="status-date-content date-content">
+                            {{ datePipe.transform(data.sentAt,
+                            commonService.date_time_format) }}
+                          </span></ion-note>
+                      </div>
+                    </ion-col>
+                    <ion-col size="12" *ngFor="let list of data.conversationList">
+                      <div>
+                        <ion-img class="icons-style Icon-rotate" *ngIf="list.content.direction =='INBOUND'"
+                          src="../../../assets/icon/incomming.svg"></ion-img>
+                        <ion-img class="icons-style" *ngIf="list.content.direction =='OUTBOUND'"
+                          src="../../../assets/icon/outgoing.svg"></ion-img>
+                      </div>
+                      <div class="O-A" style="display: flex; flex-direction: column;">
+                        <ion-note color="primary-text P-I-E-8 "
+                          [ngClass]="{'two-lines-m': isContentOverTwoLines(list?.content?.message)}">{{
+                          list?.content?.message }}
+                          <div *ngIf="isContentOverTwoLines(list?.content?.message)" class="view-more-container">
+                            <ion-label class="y-path" (click)="toggleViewMore(list)">View
+                              more</ion-label>
+                          </div>
+                        </ion-note>
+                        <ion-note style="display: flex;
+                        justify-content: start;
+                        flex-direction: row-reverse;
+                        align-items: center;"><span class="status-date-content badge-content"
+                            *ngIf="list.direction ==='OUTBOUND'">{{list.status}}</span><span
+                            class="status-date-content date-content">
+                            {{ datePipe.transform(list.sentAt,
+                            commonService.date_time_format) }}
+                          </span></ion-note>
+                      </div>
+                    </ion-col>
+                  </ion-row>
+                </ion-card>
+              </div>
+            </ng-container>
+          </ion-col>
+          <!-- work end   -->
+          <ion-col size="12" *ngIf="(notificationHistory != null &&!notificationHistory?.data?.length)"
+            class="notification-history-grid-layout">
+            <section class="none-data-account">
+              <div class="main-none-container">
+                <div class="sub-container-none">
+                  No Notifications Available</div>
+              </div>
+            </section>
+          </ion-col>
+          <ion-col size="12" *ngIf="!notificationHistory" style="height:calc(100vh - 440px);">
+            <div class="loader">
+              <ion-spinner></ion-spinner>
+            </div>
+          </ion-col>
+        </ion-row>
+        <!-- only see more -->
+        <ion-row>
+          <ion-col *ngIf="notificationHistory?._metadata?.limit < notificationHistory?._metadata?.totalRecords"
+            size="12" class="view-more-side">
+            <ion-button (click)="loadMore()">
+              <ion-label>See More</ion-label>
+            </ion-button>
+          </ion-col>
+        </ion-row>
+      </ion-col>
+      <!-- right container -->
+      <ion-col size="4" class="left-side-notification">
+        <ion-row class="magrin-t-b" style="height: 36px;">
+          <ion-col style="display: flex; align-items: center;">
+            <ion-label class="common-header" style="margin: 0px;">Custom Tags</ion-label>
+          </ion-col>
+        </ion-row>
+        <ion-row *ngIf="customer?.tags.length">
+          <ion-col size="12" class="List" *ngFor="let tags of customer.tags; ">
+            <ion-row class="opportunitie-date">
+              <ion-col size="6">
+                <ion-label>{{tags.field}}</ion-label>
+              </ion-col>
+              <ion-col size="6">
+                <ion-label>{{tags.value}}</ion-label>
+              </ion-col>
+            </ion-row>
+          </ion-col>
+        </ion-row>
+        <ion-row *ngIf="(!customer?.tags.length && customer?.tags.length !=undefined)">
+          <ion-col size="12">
+            <section class="none-data-account">
+              <div class="main-none-container">
+                <div class="sub-container-none">
+                  No Tags</div>
+              </div>
+            </section>
+          </ion-col>
+        </ion-row>
+        <ion-row *ngIf="!customer.tags">
+          <ion-col>
+            <div class="loader">
+              <ion-spinner></ion-spinner>
+            </div>
+          </ion-col>
+        </ion-row>
+        <ion-row class="M-20">
+          <ion-col style="margin-bottom: 4px;">
+            <ion-label class="common-header">Segments</ion-label>
+          </ion-col>
+        </ion-row>
+        <ion-row class="segements" *ngIf="segmentsList?.length != 0 && segmentsList">
+          <ion-col size="12" *ngFor="let list of segmentsList">
+            <ion-label>{{list.name}}</ion-label>
+          </ion-col>
+        </ion-row>
+        <ion-row *ngIf="(!segmentsList?.length && segmentsList?.length!= undefined)">
+          <ion-col size="12">
+            <section class="none-data-account">
+              <div class="main-none-container">
+                <div class="sub-container-none">
+                  No Segments Matched</div>
+              </div>
+            </section>
+          </ion-col>
+        </ion-row>
+        <ion-row *ngIf="!segmentsList">
+          <ion-col>
+            <div class="loader">
+              <ion-spinner></ion-spinner>
+            </div>
+          </ion-col>
+        </ion-row>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</section>
+
+<ion-modal class="view-message-modal" [isOpen]="isModalOpen" backdropDismiss="false">
+  <ng-template>
+    <ion-content>
+      <ion-row class="top-container">
+        <ion-col size="12" class="ion-no-padding">
+          <h3 class="ion-text-center header-text">{{notificationHistory.moreViewData.channel}}</h3>
+          <div class="close-wrapper">
+            <ion-label (click)="this.isModalOpen = false">
+              <ion-icon name="close-outline"></ion-icon>
+              <p>Close</p>
+            </ion-label>
+          </div>
+        </ion-col>
+      </ion-row>
+      <ion-row class="content-container">
+        <ion-col size="12" class="ion-no-padding">
+          <div class="message-overall-container">
+            <div>
+              <p><span>Subject:</span> {{notificationHistory.moreViewData.content?.subject}}</p>
+              <p><span>From:</span> {{notificationHistory.moreViewData.identifier}}</p>
+            </div>
+            <div>
+              <div>
+                <p>{{notificationHistory.moreViewData.content.message}}</p>
+              </div>
+            </div>
+          </div>
+        </ion-col>
+      </ion-row>
+    </ion-content>
+  </ng-template>
+</ion-modal>

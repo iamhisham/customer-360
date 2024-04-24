@@ -1,0 +1,84 @@
+<ion-row>
+  <ion-col class="ion-no-padding">
+    <div class="tab-outline">
+      <ul class="tab-container cursor-pointer">
+        <li *ngFor="let Tab of interactionHistoryTabs" [ngClass]="{'active' : selectedList===Tab}"
+          (click)="showComponent(Tab)">
+          {{Tab}}
+        </li>
+      </ul>
+      <div class="tab-content">
+        <ng-container *ngIf="selectedList === 'Insights'">
+          <!-- <p>insights</p> -->
+        </ng-container>
+
+        <ng-container *ngIf="selectedList === 'Recommendation'">
+          <ion-row>
+            <ion-col style="margin-bottom: 8px;">
+              <ion-label class="common-header" *ngIf="opportunities?.length">Opportunities</ion-label>
+            </ion-col>
+          </ion-row>
+          <div *ngIf="opportunities?.length">
+            <ion-row *ngFor="let opportunitie of opportunities" class="opportunities">
+              <ion-col size="12">
+                <ion-label>{{opportunitie.name}}</ion-label>
+              </ion-col>
+              <ion-col size="12">
+                <ion-row class="opportunitie-date">
+                  <ion-col size="6">
+                    Stage:
+                  </ion-col>
+                  <ion-col size="6">
+                    <ion-label>{{opportunitie.stage}}</ion-label>
+                  </ion-col>
+                </ion-row>
+              </ion-col>
+              <ion-col size="12">
+                <ion-row class="opportunitie-date P-T">
+                  <ion-col size="6">
+                    TotalAmount :
+                  </ion-col>
+                  <ion-col size="6">
+                    <ion-label>{{opportunitie.totalAmount}}</ion-label>
+                  </ion-col>
+                </ion-row>
+              </ion-col>
+              <ion-col size="12">
+                <ion-row class="opportunitie-date ">
+                  <ion-col size="6">
+                    Owner :
+                  </ion-col>
+                  <ion-col size="6">
+                    <ion-label>{{opportunitie.ownerName}}</ion-label>
+                  </ion-col>
+                </ion-row>
+              </ion-col>
+              <ion-col size="12">
+                <ion-row class="opportunitie-date P-T">
+                  <ion-col size="6">
+                    CloseDate :
+                  </ion-col>
+                  <ion-col size="6">
+                    <ion-label>{{datePipe.transform(opportunitie.closeDate,
+                      commonService.date_format)}}</ion-label>
+                  </ion-col>
+                </ion-row>
+              </ion-col>
+            </ion-row>
+          </div>
+          <ion-row *ngIf="!opportunities">
+            <ion-col>
+              <div class="loader">
+                <ion-spinner></ion-spinner>
+              </div>
+            </ion-col>
+          </ion-row>
+        </ng-container>
+
+        <ng-container *ngIf="selectedList === 'Timeline'">
+          <!-- <p>Timeline</p> -->
+        </ng-container>
+      </div>
+    </div>
+  </ion-col>
+</ion-row>

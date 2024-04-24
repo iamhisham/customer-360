@@ -1,0 +1,16 @@
+<div class="container">
+  <div class="progress-container">
+    <div class="progress" [style.width]="progressWidth"></div>
+    <div *ngFor="let circle of progressbarObj" (click)="checkGoBack(circle.id)"
+      [ngClass]="{'active': circle.id <= currentActive, 'tick': circle.id < currentActive, 'cursor-pointer': currentActive > circle.id }"
+      class="circle">
+      <ion-icon *ngIf="circle.id < currentActive" name="checkmark-sharp"></ion-icon>
+      <ion-img *ngIf="circle.id > currentActive" [src]="circle.non_active" class="not-active-img" />
+      <div class="title-wrapper">
+        <p [ngClass]="{'active': circle.id == currentActive }">{{circle.title}}</p>
+      </div>
+    </div>
+  </div>
+  <!-- <button class="btn" (click)="prev()">Prev</button>
+  <button class="btn" (click)="next()">Next</button> -->
+</div>

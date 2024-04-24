@@ -1,0 +1,22 @@
+.result-container {
+    padding: 32px;
+    h4 {
+        margin-bottom: 12px;
+    }
+    p {
+        margin-bottom: 12px;
+        font-size: 16px;
+    }
+}
+
+.search-result-text {
+    color: var(--ion-color-primary-text) !important;
+    font-family: 'Roboto-Medium';
+    font-size: 24px;
+    font-weight: 500;
+    span {
+        color: var(--ion-color-secondary-text-tint);
+        font-size: 16px;
+        font-family: Roboto-Medium;
+    }
+}

@@ -1,0 +1,232 @@
+// @import '../../../theme/form.scss';
+
+.userSegment-grid-container {
+  background-color: var(--ion-color-background);
+  height: calc(100vh - 123px);
+  padding: 40px;
+}
+
+.create-ion-button {
+  width: 172px;
+  float: right;
+  // background-color: red;
+  --background: var(--ion-color-primary-color);
+}
+
+.top-layer-btns {
+  display: flex;
+  justify-content: end;
+
+  .recommend_btn {
+    margin: 0px;
+    margin-right: 8px;
+  }
+
+  ion-button {
+    --background: var(--ion-color-primary-color);
+    cursor: pointer;
+    margin: 0;
+  }
+}
+
+ion-popover.userSegment-table-popover {
+  --width: 120px;
+  font-weight: 500 !important;
+
+  ion-item {
+    font-size: 12px !important;
+    padding: 0px;
+    font-weight: 500 !important;
+    color: var(--ion-content-txt);
+    --padding-end: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .create-ion-button {
+    min-width: 170px;
+    height: 41px;
+    --padding-start: 5px;
+  }
+
+  .create-icon {
+    margin-left: -1px !important;
+    margin-right: 2px !important;
+    margin-top: 0px !important;
+    height: 24px !important;
+  }
+
+  .ion-color-tertiary ion-label {
+    min-width: 75px;
+    font-size: 12px;
+    padding: 15px 10px 15px 0px;
+    color: var(--ion-color-secondary);
+    margin-right: -16px;
+  }
+}
+
+
+
+::ng-deep .searchbar-has-value.searchbar-should-show-clear.sc-ion-searchbar-md-h .searchbar-clear-button.sc-ion-searchbar-md {
+  display: block;
+  background: white;
+  margin: 1px -3px 0px 0px;
+  height: 41px;
+}
+
+.right-content {
+  background-color: var(--ion-color-background) !important;
+}
+
+
+// Recommendation popover
+// variables
+$slowly: all .2s ease;
+
+// mixins
+@mixin transition($value...) {
+  -webkit-transition: $value;
+  -moz-transition: $value;
+  -ms-transition: $value;
+  transition: $value;
+}
+
+@mixin transform($value...) {
+  -webkit-transform: $value;
+  -moz-transform: $value;
+  -ms-transform: $value;
+  transform: $value;
+}
+
+.recommendationCloseViewContainer {
+  right: calc(-35% + -1%);
+  @include transition($slowly);
+}
+
+.recommendationOpenViewContainer {
+  right: 1%;
+  @include transition($slowly);
+}
+
+.recommendViewModal {
+  --height: 100%;
+  --width: 20%;
+  padding-top: calc(82.46) + px;
+  transform: translateX(40%);
+  --backdrop-opacity: 0
+}
+
+.recmmd-wrapper {
+  height: 100%;
+
+  ion-header {
+    ion-toolbar {
+      --background: var(--ion-color-primary-color);
+
+      ion-title {
+        font-size: 18px;
+        color: #fff;
+      }
+
+      ion-buttons {
+        ion-button {
+          color: #fff;
+        }
+
+      }
+    }
+  }
+
+  .recommendation-content {
+    .custom-chip {
+      margin: 12px 10px;
+      padding: 0px;
+      border-radius: 6px;
+      cursor: pointer;
+      user-select: none;
+
+      h3 {
+        text-transform: capitalize;
+        font-size: 18px;
+        font-weight: 600;
+        letter-spacing: 1px;
+        color: var(--ion-color-primary-text);
+      }
+
+      .two-lines {
+        margin-top: 4px;
+        overflow: hidden;
+        flex-wrap: nowrap;
+        max-height: 3em;
+        font-size: 16px;
+        line-height: 24px;
+        color: var(--ion-color-secondary-text);
+      }
+
+    }
+  }
+
+}
+
+
+
+.rec {
+  transform: translateX(40%);
+  display: block;
+  // --backdrop-opacity: 0;
+  // background-color: red;
+  // --background: red;
+  // height: 100vh;
+}
+
+.rec-close {
+  // transform: translateX(100%);
+  --backdrop-opacity: 0;
+  // background-color: red;
+  // --background: red;
+  height: 100vh;
+}
+
+.none-data-account {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: calc(100vh - 235px);
+
+  .main-none-container {
+    width: 320px;
+    height: 60px;
+    padding: 10px 20px;
+    background: var(--ion-color-tertiary-color);
+    border-radius: 10px;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    display: inline-flex;
+
+    .sub-container-none {
+      color: var(--available-text-color);
+      font-size: 16px;
+      line-height: 39px;
+      letter-spacing: 0.49px;
+      word-wrap: break-word;
+      font-family: 'Roboto-Medium';
+    }
+  }
+
+}
+
+.table-header {
+  display: flex;
+
+  ion-label {
+    font-size: 20px;
+    font-family: "Roboto-Medium";
+    font-weight: 500;
+    word-wrap: break-word;
+  }
+}
+
+.M-24 {
+  margin-top: 24px;
+}

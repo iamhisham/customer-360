@@ -1,0 +1,347 @@
+<ion-content *ngIf="customer.id">
+  <!-- with data -->
+  <section>
+    <div class="overall-wrapper">
+      <ion-grid class="ion-no-padding">
+        <!-- CUSTOMER SECTION -->
+        <ion-row class="top-customer-section">
+          <ion-col size="0.3" class="ion-no-padding back-btn">
+            <ion-card class="ion-no-margin cursor-pointer" color="tertiary-color">
+              <ion-icon name="chevron-back-outline"></ion-icon>
+            </ion-card>
+          </ion-col>
+          <ion-col size="11.7" class="ion-no-padding customer-content-column">
+            <section>
+              <div class="customer-img">
+                <ion-avatar>
+                  <div>
+                    <ion-label>{{customerService.customerNameLogo}}</ion-label>
+                  </div>
+                </ion-avatar>
+              </div>
+              <div class="customer-datas">
+                <div class="customer-data-name">
+                  <ion-label name="customer_name"> {{ customer.name }} </ion-label>
+                  <ion-note class="textCapitalize"> {{ customer.type }} </ion-note>
+                </div>
+                <div class="customer-personal-details">
+                  <div class="d-flex-and-aligncenter">
+                    <ion-img src="../../assets/user.svg" />
+                    <ion-label name="customer_id" class="text-wrapper" style="min-width: 99px; max-width: 140px;">
+                      Customer ID: {{ customer.id }} </ion-label>
+                  </div>
+                  <div *ngIf="customer.primaryAddress?.address" class="d-flex-and-aligncenter">
+                    <ion-img src="../../assets/map-pin.svg" />
+                    <ion-label name="customer_addresses" class="address-wrap"
+                      [ngClass]="{'max-width-275' : customer.primaryPhone?.extWithNumber && customer.primaryEmail?.email, 'max-width-525': ((customer.primaryPhone?.extWithNumber && !customer.primaryEmail?.email) || (!customer.primaryPhone?.extWithNumber && customer.primaryEmail?.email)), 'max-width-750': !customer.primaryPhone?.extWithNumber && !customer.primaryEmail?.email }">{{customer.primaryAddress?.address}}</ion-label>
+                    <a (click)="presentPopover($event, customer.contactPointAddresses,'right', 'Address')"
+                      class="cursor-pointer" *ngIf="customer.contactPointAddresses.length > 1"
+                      name="customer_address_viewall"> View All </a>
+                  </div>
+                  <div *ngIf="customer.primaryPhone?.extWithNumber" class="d-flex-and-aligncenter">
+                    <ion-img src="../../assets/phone.svg" />
+                    <ion-label name="customer_phone" class="phone-max-width">
+                      {{customer.primaryPhone?.extWithNumber | PhoneNumberPipe}}</ion-label>
+                    <a (click)="presentPopover($event, customer.contactPointPhones,'right', 'Phone Number')"
+                      class="cursor-pointer" *ngIf="customer.contactPointPhones.length > 1"
+                      name="customer_phone_viewall">
+                      View All </a>
+                  </div>
+                  <div *ngIf="customer.primaryEmail?.email" style="margin-right: 0px;" class="d-flex-and-aligncenter">
+                    <ion-img src="../../assets/mail.svg" />
+                    <ion-label name="customer_email" class="email-max-width"> {{ customer?.primaryEmail.email }}
+                    </ion-label>
+                    <a name="customer_email_viewall" style="margin-right: 0px;"
+                      (click)="presentPopover($event, customer.contactPointEmails,'right', 'Email Address')"
+                      class="cursor-pointer" *ngIf="customer.contactPointEmails.length > 1"> View
+                      All </a>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </ion-col>
+        </ion-row>
+
+        <!-- ACCOUNT SECTION -->
+        <div class="customer-account-section" *ngIf="customer.id">
+          <div class="customScroller left-side-container">
+            <section>
+              <div class="account-section-hideshow" *ngIf="customer.accounts?.length >= 1">
+                <div class="account-heading">
+                  <ion-label> Accounts </ion-label>
+                  <a class="cursor-pointer" (click)="modelList.isAccountEditModal = true"
+                    *ngIf="customer?.accounts?.length >= 1"> Edit </a>
+                </div>
+                <div class="account-scroll-content">
+                  <ion-icon class="back-btn cursor-pointer" id="left-element"
+                    *ngIf="customer.accounts.length > 4 && shouldShowLeftArrow()" name="chevron-back-outline"
+                    (click)="scrollLeft()">
+                  </ion-icon>
+                  <div class="card-data-container" #swiper>
+                    <div style="display: flex;">
+                      <ion-card [id]="'account-'+accounts.id" class="ion-no-margin cursor-pointer"
+                        *ngFor="let accounts of customer.accounts"
+                        [ngClass]="accountId === accounts.id ? 'highlight-ion-card' : '' "
+                        (click)="switchAccount(accounts)">
+                        <ion-label [title]="accounts.nickName">{{ accounts.nickName }}</ion-label>
+                        <ion-note [title]="accounts.accountNumber">{{ accounts.accountNumber }}</ion-note>
+                      </ion-card>
+                    </div>
+                  </div>
+                  <ion-icon class="frwd-btn cursor-pointer" id="right-element"
+                    *ngIf="customer.accounts.length > 4  && shouldShowRightArrow()" name="chevron-forward-outline"
+                    (click)="scrollRight()"></ion-icon>
+                </div>
+                <section class="customer-account-data-section">
+                  <ion-grid class="ion-no-padding">
+                    <ion-row>
+                      <ion-col size="4.7" style="display: flex;
+                          align-items: baseline;" class="ion-no-padding m-r"
+                        *ngIf="account?.primaryAddress || account?.primaryPhone || account?.primaryEmail">
+
+                        <div class="accnt-data-left" *ngIf="account !== null">
+                          <div class="each-line-wrapper" [ngClass]="account.primaryAddress?.address?'':'visible'">
+                            <ion-img class="P-T-3" *ngIf="account.primaryAddress?.address"
+                              src="../../assets/icons/map-pin.svg"></ion-img>
+                            <ion-label color="primary-text" name="account_address">{{ account.primaryAddress?.address}}
+                              <span class="cursor-pointer" name="account_address_viewall"
+                                (click)="presentPopover($event,account.contactPointAddresses,'left', 'Address')"
+                                [ngClass]="account.contactPointAddresses?.length > 1?'':'visible'">View
+                                All</span></ion-label>
+
+                          </div>
+                          <div class="each-line-wrapper" [ngClass]="account.primaryPhone?.extWithNumber?'':'visible'">
+                            <ion-img *ngIf="account.primaryPhone?.extWithNumber"
+                              src="../../assets/icons/phone.svg"></ion-img>
+                            <ion-label color="primary-text" name="account_phone">{{account.primaryPhone?.extWithNumber |
+                              PhoneNumberPipe}}
+                              <span class="cursor-pointer" name="account_phone_viewall"
+                                (click)="presentPopover($event,account.contactPointPhones,'left', 'Phone Number')"
+                                [ngClass]="account.contactPointPhones?.length > 1?'':'visible'">View
+                                All</span></ion-label>
+
+                          </div>
+                          <div class="each-line-wrapper" [ngClass]="account.primaryEmail?.email?'':'visible'">
+
+                            <ion-img class="P-T-1" *ngIf="account.primaryEmail?.email"
+                              src="../../assets/icons/mail.svg"></ion-img>
+                            <ion-label color="primary-text" name="account_email">{{ account.primaryEmail?.email
+                              }} <span class="cursor-pointer" name="account_email_viewall"
+                                (click)="presentPopover($event, account.contactPointEmails,'left', 'Email Address')"
+                                [ngClass]="account.contactPointEmails?.length > 1?'':'visible'">View
+                                All
+                              </span></ion-label>
+
+                          </div>
+                        </div>
+
+                        <div class="loader" *ngIf="account === null">
+                          <ion-spinner></ion-spinner>
+                        </div>
+                      </ion-col>
+                      <ion-col size="4.7" class="ion-no-padding m-r" style="padding-right: 16px;"
+                        *ngIf="!account?.primaryAddress && !account?.primaryPhone && !account?.primaryEmail">
+                        <div class="none-data-address" *ngIf="account?.isContactLoaded">
+                          <div class="main-none-container">
+                            <div class="sub-container-none">
+                              Contact details not available
+                            </div>
+                          </div>
+                        </div>
+                        <div class="loader" *ngIf="!account?.isContactLoaded">
+                          <ion-spinner></ion-spinner>
+                        </div>
+                      </ion-col>
+                      <ion-col size="7" offset="0.3">
+                        <div class="account-data-right">
+                          <div class="card-wrapper">
+                            <ion-card class="ion-no-margin" color="tertiary-color">
+                              <div>
+                                <ion-label>Outstanding</ion-label>
+                                <div class="loader" *ngIf="outstandingWalletGoldData === null"
+                                  style="align-items: start;">
+                                  <ion-spinner style="height: 22px; margin-top: 1px;"></ion-spinner>
+                                </div>
+                                <ion-note *ngIf="outstandingWalletGoldData">
+                                  <span *ngIf="outstandingWalletGoldData?.outstandingAmount > 0">
+                                    {{ outstandingWalletGoldData?.currencyIsoCode | CurrencyPipe }} {{
+                                    outstandingWalletGoldData?.outstandingAmount | CurrencyPipe }}</span>
+                                  <span *ngIf="outstandingWalletGoldData?.outstandingAmount == 0"> -- </span>
+                                </ion-note>
+                              </div>
+                            </ion-card>
+                          </div>
+                          <div class="card-wrapper">
+                            <ion-card class="ion-no-margin" color="tertiary-color">
+                              <ion-label color="primary-text">
+                                Wallet <ion-icon src="../../assets/icons/wallet.svg"></ion-icon>
+                              </ion-label>
+                              <ion-note>***</ion-note>
+                            </ion-card>
+                          </div>
+                          <div class="card-wrapper">
+                            <ion-card class="ion-no-margin" color="tertiary-color">
+                              <ion-label color="primary-text">
+                                Gold <ion-icon src="../../assets/icons/Group 1269.svg"></ion-icon>
+                              </ion-label>
+                              <ion-note>***</ion-note>
+                            </ion-card>
+                          </div>
+                        </div>
+                      </ion-col>
+                    </ion-row>
+                  </ion-grid>
+                </section>
+              </div>
+
+              <div class="account-section-hideshow" *ngIf="customer.accounts?.length == 0 ">
+                <div class="account-heading">
+                  <ion-label> Accounts </ion-label>
+                  <a class="cursor-pointer" (click)="modelList.isAccountEditModal = true"
+                    *ngIf="customer?.accounts?.length >= 1"> Edit </a>
+                </div>
+                <section class="customer-account-data-section none-data-account">
+                  <div class="main-none-container">
+                    <div class="sub-container-none">
+                      No accounts available</div>
+                  </div>
+                </section>
+              </div>
+
+              <!-- component load - tab type -->
+              <section class="tab-switch-components">
+                <ion-grid class="ion-no-padding">
+                  <ion-row class="tab-row">
+                    <ion-col class="ion-no-padding border-r" size-xl="12" size-lg="12" size-md="12" size-sm="12"
+                      offset-sm="0" size-xs="12" offset-xs="0">
+                      <div class="tab-outline" id="tab-content">
+                        <ul class="tab-container">
+                          <li (click)="selectTab('Overview')" [ngClass]="{'active' : selectedTab === 'Overview'}">
+                            Overview</li>
+                          <li (click)="selectTab('Usage and balance')"
+                            [ngClass]="{'active' : selectedTab === 'Usage and balance'}">
+                            Usage and balance</li>
+                          <li (click)="selectTab('Billing')" [ngClass]="{'active' : selectedTab === 'Billing'}">Billing
+                          </li>
+                          <li (click)="selectTab('Tickets')" [ngClass]="{'active' : selectedTab === 'Tickets'}">Tickets
+                          </li>
+                          <li (click)="selectTab('Notifications')"
+                            [ngClass]="{'active' : selectedTab === 'Notifications'}">
+                            Notifications</li>
+                          <li (click)="selectTab('Orders')" [ngClass]="{'active' : selectedTab === 'Orders'}">Orders
+                          </li>
+                        </ul>
+                        <div class="tab-content">
+                          <ng-container *ngIf="selectedTabList.indexOf('Overview') != -1">
+                            <app-overview #overviewComponent [customerId]="customer.id" [accountId]="accountId"
+                              [hidden]="selectedTab != 'Overview'"></app-overview>
+                          </ng-container>
+                          <ng-container *ngIf="selectedTabList.indexOf('Billing') != -1">
+                            <app-billing #BillingComponent [customer]="customer" [accountId]="accountId"
+                              [hidden]="selectedTab != 'Billing'"></app-billing>
+                          </ng-container>
+                          <ng-container *ngIf="selectedTabList.indexOf('Tickets') != -1">
+                            <app-tickets #TicketsComponent [customer]="customer" [accountId]="accountId"
+                              [hidden]="selectedTab != 'Tickets'"></app-tickets>
+                          </ng-container>
+                          <ng-container *ngIf="selectedTabList.indexOf('Orders') != -1">
+                            <app-orders #OrdersComponent [customer]="customer" [customerId]="customer.id"
+                              [accountId]="accountId" [hidden]="selectedTab != 'Orders'"></app-orders>
+                          </ng-container>
+                          <ng-container *ngIf="selectedTabList.indexOf('Usage and balance') != -1">
+                            <app-usage-and-balance #usageAndBalance [customerId]="customer.id" [accountId]="accountId"
+                              [hidden]="selectedTab != 'Usage and balance'"></app-usage-and-balance>
+                          </ng-container>
+                          <ng-container *ngIf="selectedTabList.indexOf('Notifications') != -1">
+                            <app-notifications #NotificationsComponent [customer]="customer" [accountId]="accountId"
+                              [hidden]="selectedTab != 'Notifications'"></app-notifications>
+                          </ng-container>
+                        </div>
+                      </div>
+                    </ion-col>
+                  </ion-row>
+                </ion-grid>
+              </section>
+            </section>
+          </div>
+          <div class="customScroller right-side-interaction-container">
+            <app-interaction-history #InteractionComponent [customer]="customer"
+              [accountId]="accountId"></app-interaction-history>
+          </div>
+        </div>
+      </ion-grid>
+    </div>
+
+    <!-- EDIT ACCOUNTS -->
+    <ion-modal [isOpen]="modelList.isAccountEditModal" class="customer-comp-account-edit-modal account-edit-modal"
+      (willDismiss)="modelList.isAccountEditModal = false" *ngIf="customer.id">
+      <ng-template>
+        <div class="customScroller account-outer-container">
+          <div class="header">
+            <p>Edit Account ID Nick Name</p>
+          </div>
+          <ion-row class="content">
+            <ion-col size="12" class="ion-no-padding account-card-ion-col" *ngFor="let accounts of customer.accounts">
+              <div style="padding-bottom: 12px;">
+                <div class="left-detail-view">
+                  <ion-card class="ion-no-margin">
+                    <ion-label class="acc-title" [title]="accounts.nickName">{{accounts?.nickName}}</ion-label>
+                    <ion-label class="acc-number">{{accounts?.accountNumber}}</ion-label>
+                  </ion-card>
+                </div>
+                <ion-item style="height: 48px;margin-top: 10px;" lines="none">
+                  <ion-input style="min-height: 48px;" placeholder="New Nick name here"
+                    [(ngModel)]="accounts.newNickName"></ion-input>
+                </ion-item>
+              </div>
+            </ion-col>
+          </ion-row>
+        </div>
+        <ion-footer class="ion-no-border">
+          <ion-buttons slot="end" class="ion-no-margin">
+            <ion-button class="cancel-btn" (click)="modelList.isAccountEditModal = false">
+              <ion-label color="primary-text">Cancel</ion-label>
+            </ion-button>
+            <ion-button fill="solid" (click)="onSubmit(customer)" color="primary-color" class="ion-no-margin cnfrm-btn">
+              <ion-label color="white-text">Confirm</ion-label>
+            </ion-button>
+          </ion-buttons>
+        </ion-footer>
+      </ng-template>
+    </ion-modal>
+
+    <ion-popover
+      [ngClass]="((customer?.contactPointAddresses == popoverContent) || (account?.contactPointAddresses == popoverContent) )? 'view-all-popover' : '' "
+      #popover [isOpen]="isOpen" (didDismiss)="isOpen=false" class="popover-style">
+      <ng-template>
+        <ion-item class="cursor-pointer " *ngFor="let item of popoverContent"
+          [ngClass]="item.isPrimary == true ? 'highlight-selected-color' : ''">
+          <ion-label>
+            {{ item.email || '' }}
+            {{ (item.extWithNumber | PhoneNumberPipe) || '' }}
+            {{ item.address || '' }}
+          </ion-label>
+          <ion-icon class="copy-icon" title="Copy Clipboard" name="copy-outline"
+            (click)="copyToClipboard($event)"></ion-icon>
+        </ion-item>
+      </ng-template>
+    </ion-popover>
+
+  </section>
+</ion-content>
+
+<!-- IF NO DATA THEN IT WILL SHOW -->
+<!-- <ion-content *ngIf="(!customer.id && errorStatus === 404)">
+  <section class="no-customer-data-found-container">
+    <div>
+      <ion-label>No Customer Data found...!!</ion-label>
+    </div>
+  </section>
+</ion-content> -->
+
+<!-- Expand search results -->
+<!-- <ion-content
+  *ngIf="((searchParams.search && searchParams.resultType) || (customerService.customerSearchedDetails?.customerExpandDetails?.length > 0 || customerService.customerSearchedDetails?.accountExpandDetails?.length > 0)) && !customer.id"
+  class="search-result-container">
+  <app-expand-table-page [searchParams]="searchParams"></app-expand-table-page>
+</ion-content> -->

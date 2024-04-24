@@ -1,0 +1,86 @@
+@import '../../../../../theme/variables.scss';
+
+* {
+  font-family: 'Roboto-Regular';
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--heading-text-color);
+}
+
+.tab-outline {
+  background: #ffffff;
+  overflow: hidden;
+  // padding: 20px 24px;
+
+  .tab-container {
+    border-bottom: 1px solid var(--common-text-white);
+    display: flex;
+    justify-content: space-between;
+    padding: 0px;
+    margin: 0;
+    list-style-type: none;
+    margin-bottom: 20px;
+
+    li {
+      color: var(--text-color);
+      font-size: 14px;
+      font-weight: 400;
+      word-wrap: break-word;
+      list-style: none;
+      padding-bottom: 4px;
+    }
+  }
+
+  .tab-content {
+    overflow: auto;
+  }
+}
+
+.opportunities {
+  padding: 10px;
+  border-radius: 4px;
+  border: 1px solid var(--card-border-color);
+  margin-bottom: 8px;
+}
+
+.opportunities ion-col {
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--searchbar-chip-bg);
+}
+
+.opportunities ion-col:nth-child(even) {
+  padding-top: 8px;
+}
+
+.opportunities ion-col:last-child {
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.opportunitie-date ion-col {
+  padding: 0px !important;
+  border: none;
+}
+
+.opportunitie-date ion-col:nth-child(even) {
+  display: flex;
+  justify-content: end;
+}
+
+
+//common css
+.active {
+  // color: #6495ED !important;
+  color: var(--anchor-tag);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  letter-spacing: 0.25px;
+  word-wrap: break-word;
+  border-bottom: 2px solid #6495ED;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}

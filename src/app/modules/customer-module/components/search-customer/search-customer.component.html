@@ -1,0 +1,9 @@
+<ion-content>
+  <!-- account -->
+  <div class="result-container">
+    <h4>{{searchParams.resultType == 'ACCOUNT'? 'Accounts': 'Customers'}}</h4>
+    <p class="search-result-text">Search Results for <span *ngIf="searchParams.search">({{searchParams.search}})</span>&nbsp;<span *ngIf="searchParams.type">({{searchParams.type}})</span>&nbsp;<span *ngIf="searchParams.externalSourceSystemId">({{searchParams.externalSourceSystemId}})</span>  </p>
+    <app-table [tableDetails]="accountDetails" *ngIf="searchParams.resultType == 'ACCOUNT'"></app-table>
+    <app-table [tableDetails]="customerDetails" *ngIf="searchParams.resultType == 'CUSTOMER'"></app-table>
+  </div>
+</ion-content>
